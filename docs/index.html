@@ -143,9 +143,9 @@ footer a{color:var(--text-muted)}
     <p class="lede">Each release gets one evidence page with the gate-by-gate results and the verdict. The current in-flight release is at the top.</p>
     <div class="releases">
       <div class="rel">
-        <div class="ver">v0.6.3 + v0.6.4</div>
+        <div class="ver">v0.6.3</div>
         <span class="status shipped">✓ shipped</span>
-        <p>Hierarchy + KG + Capabilities v2 + 93.08% coverage. Ship-gate 4 phases pass · a2a-gate 48 scenarios pass · all 5 distribution channels live (crates.io · Homebrew · Ubuntu PPA · Fedora COPR · Docker GHCR via v0.6.4 Dockerfile patch).</p>
+        <p>Hierarchy + KG + Capabilities v2 + 93.08% coverage. Ship-gate 4 phases pass · a2a-gate 48 scenarios pass · all 4 distribution channels live (crates.io · Homebrew · Fedora COPR · Docker GHCR).</p>
         <a href="releases/v0.6.3/">view evidence →</a>
       </div>
       <div class="rel">
@@ -206,7 +206,7 @@ footer a{color:var(--text-muted)}
       <li><strong style="color:var(--text);font-family:var(--font-mono)">ship-gate Phase 3 (migration)</strong> — upgrade path from prior release tag. ~30 min.</li>
       <li><strong style="color:var(--text);font-family:var(--font-mono)">ship-gate Phase 4 (chaos)</strong> — peer kill, network partition, clock skew. Soak windows for production-quality (3-21 days); abbreviated for fast release. ~2 hours abbreviated.</li>
       <li><strong style="color:var(--text);font-family:var(--font-mono)">a2a-gate certification</strong> — selected cells (full = 6 cells). ~3-5 hours per cell.</li>
-      <li><strong style="color:var(--text);font-family:var(--font-mono)">final tag</strong> — release pipeline publishes to crates.io / GHCR / Homebrew / Ubuntu PPA / Fedora COPR.</li>
+      <li><strong style="color:var(--text);font-family:var(--font-mono)">final tag</strong> — release pipeline publishes to crates.io / GHCR / Homebrew / Fedora COPR.</li>
       <li><strong style="color:var(--text);font-family:var(--font-mono)">post-publish smoke</strong> — install from each channel, verify the binary serves <code>memory_capabilities</code>.</li>
     </ol>
   </div>

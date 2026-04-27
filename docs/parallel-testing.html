@@ -225,12 +225,11 @@ footer{padding:2.5rem 1.5rem;text-align:center;font-size:.85rem;color:var(--text
         <span class="stage-name">4 · Distribution-channel smoke</span>
         <div class="stage-times"><span class="seq">2h sequential</span><span class="arr">→</span><span class="par">15m parallel</span></div>
       </div>
-      <div class="stage-desc">Five channel-validation agents fire in parallel. Each: pull/install → version check → start daemon → call <code>memory_capabilities</code>, assert <code>schema_version=2</code>. Independent — no shared state.</div>
+      <div class="stage-desc">Four channel-validation agents fire in parallel. Each: pull/install → version check → start daemon → call <code>memory_capabilities</code>, assert <code>schema_version=2</code>. Independent — no shared state.</div>
       <table class="stage-table"><thead><tr><th>Channel</th><th style="text-align:right">Time</th><th>Agent runs on</th></tr></thead><tbody>
         <tr><td class="nm">Homebrew</td><td class="num">15m</td><td>macOS runner</td></tr>
         <tr><td class="nm">crates.io</td><td class="num">15m</td><td>Linux runner</td></tr>
         <tr><td class="nm">Docker GHCR</td><td class="num">10m</td><td>Linux runner</td></tr>
-        <tr><td class="nm">Ubuntu PPA</td><td class="num">15m</td><td>Linux runner (apt)</td></tr>
         <tr><td class="nm">Fedora COPR</td><td class="num">15m</td><td>Linux runner (dnf)</td></tr>
       </tbody></table>
     </div>
