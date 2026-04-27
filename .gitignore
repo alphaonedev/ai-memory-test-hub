@@ -1,0 +1,39 @@
+# Secrets — NEVER commit
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+credentials.json
+secrets/
+
+# Terraform state (when added)
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+
+# Run artifacts (live in gate repos, not here)
+runs/
+*.log
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Python / orchestrator
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.venv/
+venv/
+
+# Node (if a webhook receiver lands)
+node_modules/
+.npm
