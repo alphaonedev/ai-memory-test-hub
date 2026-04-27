@@ -96,8 +96,8 @@ footer{padding:2.5rem 1.5rem;text-align:center;font-size:.85rem;color:var(--text
         <tr><td style="padding:.55rem .85rem;border-top:1px solid var(--border);font-family:var(--font-mono)">ship-gate campaign · attempt 1</td><td style="padding:.55rem .85rem;border-top:1px solid var(--border);color:var(--bad);font-family:var(--font-mono)">▸ FAIL (infra)</td><td style="padding:.55rem .85rem;border-top:1px solid var(--border)"><a href="https://github.com/alphaonedev/ai-memory-ship-gate/actions/runs/25005268861" style="color:var(--p1)">run #25005268861</a> · failed at terraform apply: <code>401 Unable to authenticate</code> creating VPC. Workflow logic itself is correct — v0.6.2 a2a-cert ran on this same workflow successfully across 6 cells.</td></tr>
         <tr><td style="padding:.55rem .85rem;border-top:1px solid var(--border);font-family:var(--font-mono)">a2a-gate campaign · attempt 1</td><td style="padding:.55rem .85rem;border-top:1px solid var(--border);color:var(--bad);font-family:var(--font-mono)">▸ FAIL (infra)</td><td style="padding:.55rem .85rem;border-top:1px solid var(--border)"><a href="https://github.com/alphaonedev/ai-memory-ai2ai-gate/actions/runs/25005307346" style="color:var(--p1)">run #25005307346</a> · failed at pre-apply VPC cleanup (DO API returned null payload, jq error). Same root cause as ship-gate.</td></tr>
         <tr><td style="padding:.55rem .85rem;border-top:1px solid var(--border);font-family:var(--font-mono)">credential refresh</td><td style="padding:.55rem .85rem;border-top:1px solid var(--border);color:var(--good);font-family:var(--font-mono)">▸ done</td><td style="padding:.55rem .85rem;border-top:1px solid var(--border)">Operator refreshed <code>DIGITALOCEAN_TOKEN</code> on both gate repos via GitHub UI. Re-triggered both campaigns.</td></tr>
-        <tr><td style="padding:.55rem .85rem;border-top:1px solid var(--border);font-family:var(--font-mono)">ship-gate · attempt 2</td><td style="padding:.55rem .85rem;border-top:1px solid var(--border);color:var(--gold);font-family:var(--font-mono)">▸ in progress</td><td style="padding:.55rem .85rem;border-top:1px solid var(--border)"><a href="https://github.com/alphaonedev/ai-memory-ship-gate/actions/runs/25007261531" style="color:var(--p1)">run #25007261531</a> · campaign_id <code>ship-gate-v0.6.3-rc1-r2</code> · started 16:32:54 UTC · ETA ~60-90 min</td></tr>
-        <tr><td style="padding:.55rem .85rem;border-top:1px solid var(--border);font-family:var(--font-mono)">a2a-gate · attempt 2</td><td style="padding:.55rem .85rem;border-top:1px solid var(--border);color:var(--gold);font-family:var(--font-mono)">▸ in progress</td><td style="padding:.55rem .85rem;border-top:1px solid var(--border)"><a href="https://github.com/alphaonedev/ai-memory-ai2ai-gate/actions/runs/25007262531" style="color:var(--p1)">run #25007262531</a> · campaign_id <code>a2a-ironclaw-v0.6.3-rc1-r2</code> · 48 scenarios · started 16:32:55 UTC · ETA ~25-30 min</td></tr>
+        <tr><td style="padding:.55rem .85rem;border-top:1px solid var(--border);font-family:var(--font-mono)">ship-gate · attempt 2</td><td style="padding:.55rem .85rem;border-top:1px solid var(--border);color:var(--good);font-family:var(--font-mono)">▸ PASS</td><td style="padding:.55rem .85rem;border-top:1px solid var(--border)"><a href="https://github.com/alphaonedev/ai-memory-ship-gate/actions/runs/25007261531" style="color:var(--p1)">run #25007261531</a> · all 4 phases green · 14m wall · Phase 1 functional 3s · Phase 2 multi-agent 1m56s · Phase 3 migration 1m25s · Phase 4 chaos 5m24s (50 cycles kill_primary_mid_write)</td></tr>
+        <tr><td style="padding:.55rem .85rem;border-top:1px solid var(--border);font-family:var(--font-mono)">a2a-gate · attempt 2 + 3</td><td style="padding:.55rem .85rem;border-top:1px solid var(--border);color:var(--gold);font-family:var(--font-mono)">▸ retry in progress</td><td style="padding:.55rem .85rem;border-top:1px solid var(--border)">Attempt 2 (run #25007262531) failed at pre-apply VPC cleanup with stale-token signature. Attempt 3 (<a href="https://github.com/alphaonedev/ai-memory-ai2ai-gate/actions/runs/25007946890" style="color:var(--p1)">run #25007946890</a>) just dispatched · 48 scenarios queued.</td></tr>
         <tr><td style="padding:.55rem .85rem;border-top:1px solid var(--border);font-family:var(--font-mono)">tag v0.6.3</td><td style="padding:.55rem .85rem;border-top:1px solid var(--border);color:var(--text-dim);font-family:var(--font-mono)">▸ blocked on gates</td><td style="padding:.55rem .85rem;border-top:1px solid var(--border)">version bump 0.6.3-rc1 → 0.6.3 + signed tag + push fires release pipeline</td></tr>
         <tr><td style="padding:.55rem .85rem;border-top:1px solid var(--border);font-family:var(--font-mono)">distribution smoke</td><td style="padding:.55rem .85rem;border-top:1px solid var(--border);color:var(--text-dim);font-family:var(--font-mono)">▸ queued</td><td style="padding:.55rem .85rem;border-top:1px solid var(--border)">brew · cargo · docker · apt · dnf — 5 channels in parallel</td></tr>
         <tr><td style="padding:.55rem .85rem;border-top:1px solid var(--border);font-family:var(--font-mono)">sync to main + final verdict</td><td style="padding:.55rem .85rem;border-top:1px solid var(--border);color:var(--text-dim);font-family:var(--font-mono)">▸ queued</td><td style="padding:.55rem .85rem;border-top:1px solid var(--border)">merge release/v0.6.3 → main; flip evidence page status to shipped</td></tr>
@@ -118,26 +118,26 @@ footer{padding:2.5rem 1.5rem;text-align:center;font-size:.85rem;color:var(--text
         <p>1600 lib tests, 0 failures. Coverage 93.05% (gate floor 92%). All MCP tools + HTTP routes exercised. Fmt + clippy --pedantic clean.</p>
         <div class="ev">→ release/v0.6.3 @ d4bc4b6 (post-#459)</div>
       </div>
-      <div class="phase pending">
+      <div class="phase pass">
         <div class="num">phase 2</div>
         <div class="nm">Multi-agent</div>
-        <div class="st">▸ queued</div>
-        <p>Federation W=2 of N=3 quorum. Sustained 100-row burst from node-1, verify reconciliation across peers. mTLS fingerprint allowlist enforcement.</p>
-        <div class="ev">→ scripts/phase2_multiagent.sh</div>
+        <div class="st">▸ PASS · 1m56s</div>
+        <p>Federation W=2 of N=3 quorum across 3 DigitalOcean droplets. Sustained burst from node-1; convergence verified.</p>
+        <div class="ev">→ run #25007261531</div>
       </div>
-      <div class="phase pending">
+      <div class="phase pass">
         <div class="num">phase 3</div>
         <div class="nm">Migration</div>
-        <div class="st">▸ queued</div>
-        <p>v0.6.2 → v0.6.3 schema migration on a populated DB. v15 schema: temporal-validity columns on memory_links + entity_aliases table. No data loss, all rows queryable post-migrate.</p>
-        <div class="ev">→ scripts/phase3_migration.sh</div>
+        <div class="st">▸ PASS · 1m25s</div>
+        <p>v0.6.2 → v0.6.3 migration roundtrip. v15 schema applied (temporal-validity columns + entity_aliases). All rows queryable post-migrate.</p>
+        <div class="ev">→ run #25007261531</div>
       </div>
-      <div class="phase pending">
+      <div class="phase pass">
         <div class="num">phase 4</div>
         <div class="nm">Chaos (abbreviated)</div>
-        <div class="st">▸ queued</div>
-        <p>Peer kill mid-burst, network partition, clock skew. Abbreviated form (no soak window). Production-quality soak (3-21 days) deferred per release-charter directive.</p>
-        <div class="ev">→ scripts/phase4_chaos.sh</div>
+        <div class="st">▸ PASS · 5m24s</div>
+        <p>50 cycles of kill_primary_mid_write. Zero data loss; pending actions converged; no daemon crashes. Soak windows (3-21d) deferred per directive.</p>
+        <div class="ev">→ run #25007261531</div>
       </div>
     </div>
   </div>
