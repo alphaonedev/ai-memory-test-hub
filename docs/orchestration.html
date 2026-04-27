@@ -1,0 +1,340 @@
+<!--
+  Copyright 2026 AlphaOne LLC
+  SPDX-License-Identifier: Apache-2.0
+  Distributed-agent orchestration architecture.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ai-memory · Test Hub · Distributed orchestration</title>
+<meta name="description" content="Distributed-agent orchestration architecture for ai-memory release testing. Eats its own dogfood — uses ai-memory as the coordination layer for the gates that test ai-memory.">
+<style>
+:root{--bg:#000;--bg-card:#111;--bg-elev:#161616;--bg-code:#1a1a1a;--border:#262626;--border-hl:#3d3d3d;--text:#fff;--text-muted:#999;--text-dim:#666;--p1:#6ee7ff;--p2:#ffb86b;--p3:#c8a2ff;--good:#6ee7ff;--bad:#ff6b9d;--gold:#ffd700;--font-mono:'SF Mono','Cascadia Code','Fira Code',Consolas,monospace;--font-sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;--max-w:1280px}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font-sans);background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:var(--text);text-decoration:none}a:hover{color:var(--p1)}
+code{font-family:var(--font-mono);font-size:.85rem;background:var(--bg-code);padding:.1em .35em;border-radius:4px}
+.container{max-width:var(--max-w);margin:0 auto;padding:0 1.5rem}
+h1,h2,h3{font-weight:700;letter-spacing:-0.02em}
+.topnav{position:sticky;top:0;z-index:50;background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.topnav .inner{display:flex;justify-content:space-between;max-width:var(--max-w);margin:0 auto;padding:.9rem 1.5rem;font-size:.875rem}
+.topnav a{color:var(--text-muted);margin-right:1.25rem}.topnav a:hover{color:var(--text)}
+.topnav .home-link{color:var(--text);font-weight:600}
+.topnav .right{display:flex;gap:1.25rem;flex-wrap:wrap}
+.hero{padding:4rem 1.5rem 2.5rem;text-align:center;background:radial-gradient(ellipse at center,rgba(200,162,255,0.08),transparent 60%);border-bottom:1px solid var(--border)}
+.hero h1{font-size:clamp(2rem,4.5vw,3.25rem);line-height:1.1;letter-spacing:-0.03em;margin-bottom:1rem}
+.hero .tagline{color:var(--text-muted);font-size:1.05rem;max-width:780px;margin:0 auto 1rem}
+.hero .pills{display:flex;justify-content:center;gap:.5rem;flex-wrap:wrap;margin-top:1.25rem}
+.hero .pill{padding:.4rem 1rem;border:1px solid var(--border-hl);border-radius:999px;font-family:var(--font-mono);font-size:.78rem;color:var(--text-muted)}
+
+section{padding:3.5rem 0;border-bottom:1px solid var(--border)}
+.eyebrow{display:inline-block;font-size:.72rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:.5rem;padding:.2rem .6rem;border:1px solid var(--border-hl);border-radius:999px}
+.lede{color:var(--text-muted);font-size:.95rem;max-width:820px;margin-bottom:2rem}
+
+.arch-svg{width:100%;background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:1.5rem;margin-bottom:1.5rem}
+
+.agent{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1.25rem;position:relative;overflow:hidden}
+.agent::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--p3)}
+.agent.orch::before{background:var(--gold)}
+.agent.gate::before{background:var(--p2)}
+.agent.scen::before{background:var(--good)}
+.agent.smoke::before{background:#a5d6a7}
+.agent-head{display:flex;align-items:baseline;gap:1rem;flex-wrap:wrap;margin-bottom:.5rem}
+.agent-name{font-family:var(--font-mono);font-size:1.1rem;font-weight:700;color:var(--text)}
+.agent-tag{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);padding:.15em .55em;border:1px solid var(--border-hl);border-radius:4px}
+.agent-tag.orch{color:var(--gold);border-color:rgba(255,215,0,0.4)}
+.agent-tag.gate{color:var(--p2);border-color:rgba(255,184,107,0.4)}
+.agent-tag.scen{color:var(--good);border-color:rgba(110,231,255,0.4)}
+.agent-tag.smoke{color:#a5d6a7;border-color:rgba(165,214,167,0.4)}
+.agent-desc{color:var(--text-muted);font-size:.92rem;margin-bottom:1rem}
+
+.snip{font-family:var(--font-mono);font-size:.78rem;color:var(--text-muted);margin-top:.85rem;padding:.7rem .85rem;background:var(--bg-code);border-radius:6px;line-height:1.55;white-space:pre;overflow-x:auto}
+.snip .ok{color:var(--good)}
+.snip .warn{color:var(--gold)}
+.snip .err{color:var(--bad)}
+.snip .cm{color:var(--text-dim)}
+.snip .key{color:var(--p3)}
+.snip .val{color:var(--p2)}
+.snip .num{color:var(--p1)}
+.snip .name{color:var(--text)}
+
+.callout{background:linear-gradient(135deg,rgba(200,162,255,0.10),rgba(110,231,255,0.04));border:1px solid rgba(200,162,255,0.4);border-radius:14px;padding:2rem;margin:2rem 0}
+.callout .lbl{font-family:var(--font-mono);font-size:.72rem;color:var(--p3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.5rem}
+.callout h3{font-size:1.4rem;margin-bottom:.75rem;color:var(--text)}
+.callout p{color:var(--text-muted);font-size:.95rem;line-height:1.65}
+
+footer{padding:2.5rem 1.5rem;text-align:center;font-size:.85rem;color:var(--text-dim);border-top:1px solid var(--border)}
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="inner">
+    <a class="home-link" href="./">ai-memory · Test Hub <span style="opacity:.5">▸ Orchestration</span></a>
+    <div class="right">
+      <a href="./">Hub</a>
+      <a href="parallel-testing.html">Parallel Testing</a>
+      <a href="releases/v0.6.3/">v0.6.3 evidence</a>
+      <a href="https://alphaonedev.github.io/ai-memory-mcp/">← ai-memory</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <h1>Distributed agents · ai-memory orchestrating ai-memory.</h1>
+  <p class="tagline">17 agents at peak, each owning one phase or batch. Coordinated through ai-memory itself — the system being tested is the system that holds the test campaign's state. Every phase write becomes a memory; every completion becomes an A2A notification; the orchestrator drains its inbox and updates the evidence page in real time.</p>
+  <div class="pills">
+    <span class="pill">17 agents at peak</span>
+    <span class="pill">ai-memory as coordination layer</span>
+    <span class="pill">eats own dogfood</span>
+    <span class="pill">orchestrator reusable v0.7+</span>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <span class="eyebrow">The architecture</span>
+    <h2 style="font-family:var(--font-sans);font-size:1.75rem;margin-bottom:.5rem">One orchestrator, fan-out workers, ai-memory as the bus.</h2>
+    <svg class="arch-svg" viewBox="0 0 1180 460" xmlns="http://www.w3.org/2000/svg">
+      <style>
+        .b{stroke-width:2;rx:10;ry:10}
+        .b.orch{fill:rgba(255,215,0,0.10);stroke:#ffd700}
+        .b.gate{fill:rgba(255,184,107,0.12);stroke:#ffb86b}
+        .b.scen{fill:rgba(110,231,255,0.10);stroke:#6ee7ff}
+        .b.smoke{fill:rgba(165,214,167,0.10);stroke:#a5d6a7}
+        .b.bus{fill:#0a0a0a;stroke:#c8a2ff;stroke-width:2.5}
+        .b.evidence{fill:rgba(200,162,255,0.12);stroke:#c8a2ff}
+        .h{fill:#fff;font-family:monospace;font-size:11px;font-weight:700}
+        .s{fill:#999;font-family:monospace;font-size:9px}
+        .ll{stroke:#999;stroke-width:1.4;fill:none}
+        .ll.notify{stroke:#c8a2ff;stroke-dasharray:4 4}
+        .ll.write{stroke:#6ee7ff}
+        .ll.subscribe{stroke:#ffd700}
+        .lab{fill:#999;font-family:monospace;font-size:10px;font-weight:700}
+      </style>
+      <defs><marker id="arr5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#999"/></marker><marker id="arrN" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#c8a2ff"/></marker></defs>
+
+      <!-- Top: Orchestrator -->
+      <rect class="b orch" x="500" y="20" width="220" height="60"/>
+      <text class="h" x="610" y="42" text-anchor="middle">Test Orchestrator</text>
+      <text class="s" x="610" y="58" text-anchor="middle">drains memory_inbox</text>
+      <text class="s" x="610" y="72" text-anchor="middle">updates test-hub evidence</text>
+
+      <!-- Middle: ai-memory bus -->
+      <rect class="b bus" x="320" y="180" width="580" height="60"/>
+      <text class="h" x="610" y="202" text-anchor="middle">ai-memory daemon (this is the bus)</text>
+      <text class="s" x="610" y="218" text-anchor="middle">memory_store · memory_notify · memory_subscribe · memory_inbox</text>
+      <text class="s" x="610" y="232" text-anchor="middle">namespace: release/v0.6.3/&lt;phase&gt;</text>
+
+      <!-- Workers: ship-gate phases -->
+      <rect class="b gate" x="40" y="320" width="160" height="60"/>
+      <text class="h" x="120" y="345" text-anchor="middle">Ship Phase 1</text>
+      <text class="s" x="120" y="362" text-anchor="middle">functional · 1 droplet</text>
+
+      <rect class="b gate" x="220" y="320" width="160" height="60"/>
+      <text class="h" x="300" y="345" text-anchor="middle">Ship Phase 2</text>
+      <text class="s" x="300" y="362" text-anchor="middle">multi-agent · 3 droplets</text>
+
+      <rect class="b gate" x="400" y="320" width="160" height="60"/>
+      <text class="h" x="480" y="345" text-anchor="middle">Ship Phase 3</text>
+      <text class="s" x="480" y="362" text-anchor="middle">migration · 2 droplets</text>
+
+      <rect class="b gate" x="580" y="320" width="160" height="60"/>
+      <text class="h" x="660" y="345" text-anchor="middle">Ship Phase 4</text>
+      <text class="s" x="660" y="362" text-anchor="middle">chaos · 3 droplets</text>
+
+      <!-- A2A batches -->
+      <rect class="b scen" x="760" y="320" width="160" height="60"/>
+      <text class="h" x="840" y="345" text-anchor="middle">A2A batches × 4</text>
+      <text class="s" x="840" y="362" text-anchor="middle">scenarios 1-48</text>
+
+      <!-- Smoke agents -->
+      <rect class="b smoke" x="940" y="320" width="200" height="60"/>
+      <text class="h" x="1040" y="345" text-anchor="middle">Smoke × 5 channels</text>
+      <text class="s" x="1040" y="362" text-anchor="middle">brew · cargo · docker · apt · dnf</text>
+
+      <!-- Evidence page on test-hub -->
+      <rect class="b evidence" x="40" y="20" width="220" height="60"/>
+      <text class="h" x="150" y="42" text-anchor="middle">test-hub Pages</text>
+      <text class="s" x="150" y="58" text-anchor="middle">releases/v0.6.3/index.html</text>
+      <text class="s" x="150" y="72" text-anchor="middle">auto-updates as gates land</text>
+
+      <!-- Connections orchestrator → bus -->
+      <line class="ll subscribe" x1="610" y1="80" x2="610" y2="180" marker-end="url(#arr5)"/>
+      <text class="lab" x="540" y="125" fill="#ffd700">memory_subscribe</text>
+      <text class="lab" x="555" y="155" fill="#ffd700">memory_inbox</text>
+
+      <!-- Connections workers → bus (write + notify) -->
+      <line class="ll write" x1="120" y1="320" x2="370" y2="240" marker-end="url(#arr5)"/>
+      <line class="ll write" x1="300" y1="320" x2="450" y2="240" marker-end="url(#arr5)"/>
+      <line class="ll write" x1="480" y1="320" x2="550" y2="240" marker-end="url(#arr5)"/>
+      <line class="ll write" x1="660" y1="320" x2="650" y2="240" marker-end="url(#arr5)"/>
+      <line class="ll write" x1="840" y1="320" x2="780" y2="240" marker-end="url(#arr5)"/>
+      <line class="ll write" x1="1040" y1="320" x2="900" y2="240" marker-end="url(#arr5)"/>
+      <text class="lab" x="200" y="280" fill="#6ee7ff">memory_store + memory_notify on completion</text>
+
+      <!-- Connection bus → orchestrator (notify) -->
+      <line class="ll notify" x1="500" y1="180" x2="610" y2="80" marker-end="url(#arrN)"/>
+
+      <!-- Connection orchestrator → evidence -->
+      <line class="ll" x1="500" y1="50" x2="260" y2="50" marker-end="url(#arr5)"/>
+      <text class="lab" x="380" y="42" text-anchor="middle">push run summary</text>
+
+      <!-- Legend -->
+      <rect class="b orch" x="940" y="20" width="14" height="14"/>
+      <text class="lab" x="960" y="32">Orchestrator</text>
+      <rect class="b gate" x="940" y="40" width="14" height="14"/>
+      <text class="lab" x="960" y="52">Gate workers</text>
+      <rect class="b scen" x="940" y="60" width="14" height="14"/>
+      <text class="lab" x="960" y="72">A2A batch workers</text>
+      <rect class="b smoke" x="940" y="80" width="14" height="14"/>
+      <text class="lab" x="960" y="92">Smoke channel agents</text>
+      <rect class="b bus" x="940" y="100" width="14" height="14"/>
+      <text class="lab" x="960" y="112">ai-memory bus (test target)</text>
+    </svg>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="callout">
+      <div class="lbl">▸ Eat own dogfood</div>
+      <h3>The system being tested is the system that holds the test campaign's state.</h3>
+      <p>Every test agent's progress is a memory. Every completion is an A2A notification. The orchestrator <code>memory_subscribe</code>s to <code>release/v0.6.3/*</code> and <code>memory_inbox</code> drains the queue every 30s. <strong>This is not a clever stunt — it's the strongest possible integration test.</strong> If hierarchical namespaces work, the campaign succeeds. If A2A messaging works, the orchestrator hears the workers. If governance gates work, the campaign's writes pass through them. The test campaign exercises the whole product surface under real workload at a scale we'd otherwise need to simulate.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <span class="eyebrow">The agents</span>
+    <h2 style="font-family:var(--font-sans);font-size:1.75rem;margin-bottom:.5rem">Who does what.</h2>
+
+    <div class="agent orch">
+      <div class="agent-head"><span class="agent-name">Test Orchestrator</span><span class="agent-tag orch">1 instance · always on</span></div>
+      <div class="agent-desc">Provisions infrastructure for all gate + scenario + smoke workers. Subscribes to <code>release/v0.6.3/*</code> via <code>memory_subscribe</code>. Drains <code>memory_inbox</code> every 30s. Aggregates results into the test-hub evidence page. Detects timeouts (worker silent for &gt; expected wall × 2) and surfaces stuck workers.</div>
+      <div class="snip"><span class="cm"># pseudo</span>
+ai-memory <span class="key">memory_subscribe</span> --url https://test-hub.../webhook --events memory_store \
+  --namespace_filter <span class="val">"release/v0.6.3/*"</span>
+
+<span class="key">while</span> <span class="val">running</span>:
+  inbox = ai-memory <span class="key">memory_inbox</span> --as_agent <span class="val">"orchestrator"</span> --unread_only
+  <span class="key">for</span> notification <span class="key">in</span> inbox:
+    update_evidence_page(notification)
+  <span class="key">if</span> all_phases_landed():
+    publish_final_verdict()
+    <span class="key">break</span></div>
+    </div>
+
+    <div class="agent gate">
+      <div class="agent-head"><span class="agent-name">Ship-gate Phase 1-4 workers</span><span class="agent-tag gate">4 workers · 1-3 droplets each</span></div>
+      <div class="agent-desc">Each phase has its own worker. Worker provisions its phase's terraform target, runs the existing <code>phaseN_*.sh</code> script, captures artifacts in the gate repo's <code>runs/</code> dir, and notifies the orchestrator on completion. Independent — phases don't share state, so a Phase 4 chaos failure doesn't block the Phase 1-3 gates from being marked green.</div>
+      <div class="snip"><span class="cm"># Phase worker — Phase 4 example</span>
+cd ai-memory-ship-gate
+terraform apply -target=module.phase4_chaos
+./scripts/phase4_chaos.sh release/v0.6.3 --abbreviated
+./scripts/collect_reports.sh phase4 v0.6.3
+./scripts/generate_run_html.sh
+
+<span class="cm"># Notify orchestrator</span>
+ai-memory <span class="key">memory_notify</span> \
+  --target_agent_id <span class="val">"orchestrator"</span> \
+  --title <span class="val">"Phase 4 — chaos abbreviated complete"</span> \
+  --payload <span class="val">'{"verdict":"pass","run_url":"...","duration_min":118}'</span> \
+  --priority <span class="num">8</span></div>
+    </div>
+
+    <div class="agent scen">
+      <div class="agent-head"><span class="agent-name">A2A batch workers</span><span class="agent-tag scen">4 workers · 1 droplet each</span></div>
+      <div class="agent-desc">A2A scenarios 1-48 split into 4 batches × 12 scenarios. Each batch worker spins one OpenClaw + Hermes pair on one droplet, runs its 12 scenarios sequentially within the batch (stateful), captures per-scenario JSON + stderr + provenance trace. Notifies on completion with per-scenario verdicts.</div>
+      <div class="snip"><span class="cm"># Batch worker</span>
+cd ai-memory-ai2ai-gate
+terraform apply -target=module.a2a_batch_3
+python scripts/a2a_harness.py \
+  --release v0.6.3 \
+  --cell ironclaw-mtls \
+  --scenarios 25-36 \
+  --output runs/v0.6.3/batch-3/
+
+ai-memory <span class="key">memory_notify</span> \
+  --target_agent_id <span class="val">"orchestrator"</span> \
+  --title <span class="val">"A2A batch 3 (25-36) complete"</span> \
+  --payload <span class="val">'{"passed":12,"failed":0,"run_url":"..."}'</span></div>
+    </div>
+
+    <div class="agent smoke">
+      <div class="agent-head"><span class="agent-name">Distribution smoke agents</span><span class="agent-tag smoke">5 workers · GitHub Actions runners</span></div>
+      <div class="agent-desc">Five channel-validators fire after the release pipeline publishes. Each: <code>install</code> → <code>--version</code> assertion → start daemon → assert <code>memory_capabilities</code> returns <code>schema_version=2</code>. Independent — no shared state.</div>
+      <div class="snip"><span class="cm"># Homebrew smoke agent — runs on macos-latest</span>
+brew install alphaonedev/tap/ai-memory
+ai-memory --version | grep <span class="val">"0.6.3"</span> || exit <span class="num">1</span>
+ai-memory serve &amp;
+sleep <span class="num">5</span>
+ai-memory capabilities | jq <span class="val">'.schema_version'</span> | grep <span class="val">'"2"'</span> || exit <span class="num">1</span>
+
+ai-memory <span class="key">memory_notify</span> \
+  --target_agent_id <span class="val">"orchestrator"</span> \
+  --title <span class="val">"Homebrew smoke complete"</span> \
+  --payload <span class="val">'{"channel":"brew","verdict":"pass"}'</span></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <span class="eyebrow">Why ai-memory as the bus</span>
+    <h2 style="font-family:var(--font-sans);font-size:1.75rem;margin-bottom:.5rem">Five reasons.</h2>
+    <div class="snip" style="font-family:var(--font-sans);white-space:normal;line-height:1.7">
+      <div><strong style="color:var(--good)">1. Already deployed.</strong> One ai-memory daemon already runs on your laptop or a stable infrastructure node. We don't need to spin up RabbitMQ / Kafka / Redis — the bus is ready.</div>
+      <div style="margin-top:.7rem"><strong style="color:var(--good)">2. Already tested.</strong> Every primitive the orchestrator uses (memory_store, memory_notify, memory_subscribe, memory_inbox) is in scenarios 32-33 of the a2a-gate. If they don't work, the test campaign would fail anyway — we want to know that.</div>
+      <div style="margin-top:.7rem"><strong style="color:var(--good)">3. Strongest integration test.</strong> Real workload at scale, exercising every feature: hierarchical namespaces (<code>release/v0.6.3/&lt;phase&gt;</code>), governance gates (campaign writes pass through them), federation (orchestrator on node-1, workers reporting from node-2/3), A2A messaging (notify/inbox), capabilities introspection.</div>
+      <div style="margin-top:.7rem"><strong style="color:var(--good)">4. Audit trail by default.</strong> Every campaign event is a memory. <code>memory_kg_timeline</code> on the campaign-root memory returns the entire run as a chronological event sequence. Better than ad-hoc log files.</div>
+      <div style="margin-top:.7rem"><strong style="color:var(--good)">5. Reusable for v0.7+.</strong> Same orchestrator runs the v0.7 campaign without changes — schema_version=2 ensures forward-compat for the introspection it relies on. The investment amortizes over every future release.</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <span class="eyebrow">Failure modes + fallbacks</span>
+    <h2 style="font-family:var(--font-sans);font-size:1.75rem;margin-bottom:.5rem">When the bus itself is what's being tested.</h2>
+    <div class="snip" style="font-family:var(--font-sans);white-space:normal;line-height:1.7">
+      <div><strong style="color:var(--gold)">If memory_notify breaks:</strong> Orchestrator falls back to S3-style polling of the harness's run JSON dump (artifacts already written by ship-gate's <code>collect_reports.sh</code>). Workers still complete their work; orchestrator just sees results late. No loss of fidelity.</div>
+      <div style="margin-top:.7rem"><strong style="color:var(--gold)">If memory_subscribe webhook fails:</strong> Orchestrator's <code>memory_inbox</code> polling loop catches everything. The webhook is a fast-path optimization, not a correctness requirement.</div>
+      <div style="margin-top:.7rem"><strong style="color:var(--gold)">If the ai-memory bus daemon dies:</strong> Workers continue and write artifacts to their gate repos. Orchestrator polls those repos as fallback. The campaign degrades to "slow but correct" rather than failing.</div>
+      <div style="margin-top:.7rem"><strong style="color:var(--gold)">If a worker silent times out:</strong> Orchestrator detects (timer = expected wall × 2). Surfaces the stuck worker in the evidence page. Operator can re-run that single worker without re-running the campaign.</div>
+      <div style="margin-top:.7rem"><strong style="color:var(--gold)">If a phase fails:</strong> Other phases continue. The failed phase's verdict surfaces in the evidence page. Operator decides whether to re-tag, fix forward, or accept the failure.</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <span class="eyebrow">Implementation status</span>
+    <h2 style="font-family:var(--font-sans);font-size:1.75rem;margin-bottom:.5rem">What exists, what to build.</h2>
+    <table style="width:100%;border-collapse:collapse;margin-top:1rem;font-size:.9rem">
+      <thead><tr><th style="text-align:left;padding:.55rem;font-family:var(--font-mono);font-size:.78rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--border-hl)">Component</th><th style="text-align:left;padding:.55rem;font-family:var(--font-mono);font-size:.78rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--border-hl)">Status</th><th style="text-align:left;padding:.55rem;font-family:var(--font-mono);font-size:.78rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--border-hl)">Source</th></tr></thead>
+      <tbody>
+        <tr><td style="padding:.5rem;border-bottom:1px solid var(--border)">Ship-gate phase scripts</td><td style="padding:.5rem;border-bottom:1px solid var(--border);color:var(--good)">▸ exists</td><td style="padding:.5rem;border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:.78rem">ai-memory-ship-gate</td></tr>
+        <tr><td style="padding:.5rem;border-bottom:1px solid var(--border)">A2A scenarios 1-42</td><td style="padding:.5rem;border-bottom:1px solid var(--border);color:var(--good)">▸ exists</td><td style="padding:.5rem;border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:.78rem">ai-memory-ai2ai-gate</td></tr>
+        <tr><td style="padding:.5rem;border-bottom:1px solid var(--border)">A2A scenarios 43-48 (v0.6.3-only)</td><td style="padding:.5rem;border-bottom:1px solid var(--border);color:var(--gold)">▸ to author</td><td style="padding:.5rem;border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:.78rem">ai-memory-ai2ai-gate (~45m)</td></tr>
+        <tr><td style="padding:.5rem;border-bottom:1px solid var(--border)">memory_notify / memory_subscribe / memory_inbox</td><td style="padding:.5rem;border-bottom:1px solid var(--border);color:var(--good)">▸ exists (v0.6.0+)</td><td style="padding:.5rem;border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:.78rem">ai-memory daemon</td></tr>
+        <tr><td style="padding:.5rem;border-bottom:1px solid var(--border)">Terraform per-phase targets</td><td style="padding:.5rem;border-bottom:1px solid var(--border);color:var(--good)">▸ exists</td><td style="padding:.5rem;border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:.78rem">both gate repos</td></tr>
+        <tr><td style="padding:.5rem;border-bottom:1px solid var(--border)">Orchestrator script</td><td style="padding:.5rem;border-bottom:1px solid var(--border);color:var(--gold)">▸ to build (~3h)</td><td style="padding:.5rem;border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:.78rem">this test-hub repo</td></tr>
+        <tr><td style="padding:.5rem;border-bottom:1px solid var(--border)">Webhook endpoint (test-hub)</td><td style="padding:.5rem;border-bottom:1px solid var(--border);color:var(--gold)">▸ to build (~30m)</td><td style="padding:.5rem;border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:.78rem">this test-hub repo</td></tr>
+        <tr><td style="padding:.5rem;border-bottom:1px solid var(--border)">Evidence-page auto-update</td><td style="padding:.5rem;border-bottom:1px solid var(--border);color:var(--gold)">▸ to build (~1h)</td><td style="padding:.5rem;border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:.78rem">this test-hub repo</td></tr>
+        <tr><td style="padding:.5rem">Channel-smoke GitHub Actions workflow</td><td style="padding:.5rem;color:var(--gold)">▸ to build (~30m)</td><td style="padding:.5rem;font-family:var(--font-mono);font-size:.78rem">ai-memory-mcp</td></tr>
+      </tbody>
+    </table>
+    <p class="lede" style="margin-top:1rem"><strong>~5h total scaffolding</strong> for the orchestrator + webhook + auto-update + workflow. After that, the orchestrator is reusable for every future release. <a href="parallel-testing.html" style="color:var(--p1)">See the parallel-testing page</a> for the full time math.</p>
+  </div>
+</section>
+
+<footer>
+  <p>ai-memory · Test Hub · Apache 2.0 · <a href="https://github.com/alphaonedev/test-hub/blob/main/docs/orchestration.html">edit this page</a> · see also <a href="parallel-testing.html">parallel-testing strategy</a></p>
+</footer>
+
+</body>
+</html>

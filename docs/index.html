@@ -68,6 +68,9 @@ footer a{color:var(--text-muted)}
   <div class="inner">
     <a class="home-link" href="./">ai-memory · Test Hub</a>
     <div class="right">
+      <a href="parallel-testing.html">Parallel Strategy</a>
+      <a href="orchestration.html">Orchestration</a>
+      <a href="releases/v0.6.3/">v0.6.3 evidence</a>
       <a href="https://alphaonedev.github.io/ai-memory-mcp/">← ai-memory</a>
       <a href="https://alphaonedev.github.io/ai-memory-ship-gate/">Ship Gate</a>
       <a href="https://alphaonedev.github.io/ai-memory-ai2ai-gate/">A2A Gate</a>
@@ -162,6 +165,30 @@ footer a{color:var(--text-muted)}
         <span class="status shipped">✓ shipped</span>
         <p>16+ ship-gate soak runs (soak-v0.6.0-r1 .. r16+). World-class documentation sprint, SAL track-B PR1.</p>
         <a href="https://alphaonedev.github.io/ai-memory-ship-gate/">ship-gate runs →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <span class="eyebrow">Testing strategy — parallel + distributed</span>
+    <h2 style="font-family:var(--font-sans);font-size:1.75rem;margin-bottom:.5rem">~6.5h parallel campaigns, not 16h sequential.</h2>
+    <p class="lede">Existing harnesses already support per-run isolation. We can fan a release campaign across <strong>17 agents at peak</strong> coordinated through ai-memory itself — eating our own dogfood. Two pages explain the architecture:</p>
+    <div class="gates" style="grid-template-columns:repeat(auto-fit,minmax(360px,1fr))">
+      <div class="gate ship">
+        <h3>Parallel testing strategy</h3>
+        <p>What collapses inside each stage. Sequential vs parallel time math, line by line. Constraints, costs ($5-15/campaign), and the two execution options (sequential A vs orchestrated B). <strong>Net savings: ~9.5h per campaign.</strong></p>
+        <div class="links">
+          <a href="parallel-testing.html">Read →</a>
+        </div>
+      </div>
+      <div class="gate a2a">
+        <h3>Distributed-agent orchestration</h3>
+        <p>The architecture that makes the parallelism work. ai-memory itself as the coordination bus. Workers fan out across DigitalOcean droplets + GitHub Actions runners. Orchestrator drains <code>memory_inbox</code>, updates evidence in real time. <strong>Reusable for v0.7+.</strong></p>
+        <div class="links">
+          <a href="orchestration.html">Read →</a>
+        </div>
       </div>
     </div>
   </div>
