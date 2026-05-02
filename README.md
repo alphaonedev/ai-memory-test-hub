@@ -23,12 +23,13 @@ this hub presents:
 This repo does **not** run tests itself. It's a presentation layer over the
 gate repos that already do the work.
 
-## The three gate repos
+## The gate repos
 
 | Repo | Purpose | URL |
 |---|---|---|
 | `ai-memory-ship-gate` | Release testing — Phase 1 functional, Phase 2 multi-agent, Phase 3 migration, Phase 4 chaos | <https://github.com/alphaonedev/ai-memory-ship-gate> · [pages](https://alphaonedev.github.io/ai-memory-ship-gate/) |
-| `ai-memory-ai2ai-gate` | A2A integration — 42+ scenarios across OpenClaw + Hermes agents, mTLS / TLS / off | <https://github.com/alphaonedev/ai-memory-ai2ai-gate> · [pages](https://alphaonedev.github.io/ai-memory-ai2ai-gate/) |
+| `ai-memory-ai2ai-gate` | **Umbrella spec** — testbook, scenario contracts, v1-GA criteria. The umbrella holds the spec; per-release execution lives in `ai-memory-a2a-v<version>` repos. | <https://github.com/alphaonedev/ai-memory-ai2ai-gate> · [pages](https://alphaonedev.github.io/ai-memory-ai2ai-gate/) |
+| `ai-memory-a2a-v0.6.3.1` | **Per-release execution (in flight)** — A2A campaign on a 4-node DigitalOcean mesh against `ai-memory v0.6.3.1` (tag pinned 2026-04-30). 24 scenarios (S1–S24); S9–S22 are v0.6.3.1-specific surfaces. Findings funnel into Patch 2 (#511). | <https://github.com/alphaonedev/ai-memory-a2a-v0.6.3.1> · [pages](https://alphaonedev.github.io/ai-memory-a2a-v0.6.3.1/) |
 | `ai-memory-test-hub` (this repo) | Aggregator + per-release evidence presentation | <https://github.com/alphaonedev/ai-memory-test-hub> · [pages](https://alphaonedev.github.io/ai-memory-test-hub/) |
 
 ## Layout
@@ -67,4 +68,7 @@ Apache 2.0 — same as ai-memory itself.
 ---
 
 *Hub created 2026-04-27 to centralize testing evidence for the v0.6.3 release
-campaign and onward. Older v0.6.x evidence will be backfilled as time permits.*
+campaign and onward. v0.6.3 shipped 2026-04-27. v0.6.3.1 shipped 2026-04-30
+with a per-release a2a campaign in flight at
+<https://alphaonedev.github.io/ai-memory-a2a-v0.6.3.1/>. Older v0.6.x
+evidence will be backfilled as time permits.*

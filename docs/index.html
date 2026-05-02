@@ -8,7 +8,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ai-memory · Test Hub — quality gates aggregated</title>
-<meta name="description" content="Quality-gates hub for ai-memory releases. Aggregates ship-gate (4-phase release testing) and ai2ai-gate (42-scenario A2A integration) plus per-release evidence pages.">
+<meta name="description" content="Quality-gates hub for ai-memory releases. Aggregates ship-gate (4-phase release testing), ai2ai-gate (per-release A2A integration spec), and per-release execution campaigns (currently in flight: ai-memory-a2a-v0.6.3.1, 4-node DigitalOcean mesh).">
 <style>
 :root{--bg:#000;--bg-raised:#0a0a0a;--bg-card:#111;--bg-elev:#161616;--bg-code:#1a1a1a;--border:#262626;--border-hl:#3d3d3d;--text:#fff;--text-muted:#999;--text-dim:#666;--p1:#6ee7ff;--p2:#ffb86b;--p3:#c8a2ff;--good:#6ee7ff;--bad:#ff6b9d;--gold:#ffd700;--font-mono:'SF Mono','Cascadia Code','Fira Code',Consolas,monospace;--font-sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;--max-w:1280px}
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -70,6 +70,7 @@ footer a{color:var(--text-muted)}
     <div class="right">
       <a href="parallel-testing.html">Parallel Strategy</a>
       <a href="orchestration.html">Orchestration</a>
+      <a href="https://alphaonedev.github.io/ai-memory-a2a-v0.6.3.1/" style="color:var(--gold)">v0.6.3.1 a2a (live)</a>
       <a href="releases/v0.6.3/">v0.6.3 evidence</a>
       <a href="https://alphaonedev.github.io/ai-memory-mcp/">← ai-memory</a>
       <a href="https://alphaonedev.github.io/ai-memory-ship-gate/">Ship Gate</a>
@@ -105,17 +106,20 @@ footer a{color:var(--text-muted)}
         </div>
       </div>
       <div class="gate a2a">
-        <h3>A2A Gate</h3>
-        <p>4-node DigitalOcean harness exercising ai-memory through OpenClaw + Hermes agents communicating agent-to-agent. 42+ scenarios.</p>
+        <h3>A2A Gate (umbrella spec)</h3>
+        <p>4-node DigitalOcean harness exercising ai-memory through IronClaw / Hermes / OpenClaw agents communicating agent-to-agent. The umbrella keeps the <strong>specification</strong> (testbook, scenario contracts, v1-GA criteria); per-release execution lives in <code>ai-memory-a2a-v&lt;version&gt;</code> repos.</p>
         <ul>
           <li>v0.6.2 certified — 3/3 consecutive green across 6 cells</li>
-          <li>Matrix: ironclaw + hermes + openclaw × off / tls / mtls</li>
+          <li>Matrix: ironclaw + hermes + openclaw × off / TLS / mTLS</li>
           <li>Per-scenario JSON + stderr + provenance trace</li>
           <li>Mutation, Byzantine peer, clock skew, identity spoofing</li>
+          <li><strong>v0.6.3.1 execution</strong> in flight at <a href="https://alphaonedev.github.io/ai-memory-a2a-v0.6.3.1/" style="color:var(--gold)">ai-memory-a2a-v0.6.3.1</a> (24 scenarios; S9–S22 are v0.6.3.1-specific).</li>
         </ul>
         <div class="links">
-          <a href="https://github.com/alphaonedev/ai-memory-ai2ai-gate">repo</a>
-          <a href="https://alphaonedev.github.io/ai-memory-ai2ai-gate/">live results</a>
+          <a href="https://github.com/alphaonedev/ai-memory-ai2ai-gate">umbrella repo</a>
+          <a href="https://alphaonedev.github.io/ai-memory-ai2ai-gate/">umbrella results</a>
+          <a href="https://github.com/alphaonedev/ai-memory-a2a-v0.6.3.1" style="color:var(--gold)">v0.6.3.1 repo</a>
+          <a href="https://alphaonedev.github.io/ai-memory-a2a-v0.6.3.1/" style="color:var(--gold)">v0.6.3.1 live</a>
         </div>
       </div>
       <div class="gate hub">
@@ -140,12 +144,18 @@ footer a{color:var(--text-muted)}
   <div class="container">
     <span class="eyebrow">Per-release evidence</span>
     <h2 style="font-family:var(--font-sans);font-size:1.75rem;margin-bottom:.5rem">Pick a release.</h2>
-    <p class="lede">Each release gets one evidence page with the gate-by-gate results and the verdict. The current in-flight release is at the top.</p>
+    <p class="lede">Each release gets one evidence page with the gate-by-gate results and the verdict. The current in-flight release is at the top. The pattern going forward is one <code>ai-memory-a2a-v&lt;version&gt;</code> repo per release; the umbrella <code>ai-memory-ai2ai-gate</code> stays the spec.</p>
     <div class="releases">
+      <div class="rel" style="border-color:var(--gold);box-shadow:0 0 0 1px rgba(255,215,0,0.15)">
+        <div class="ver">v0.6.3.1</div>
+        <span class="status testing">▶ testing in flight</span>
+        <p>Per-release A2A campaign on a 4-node DigitalOcean mesh. Subject under test: <code>ai-memory v0.6.3.1</code> (tag pinned 2026-04-30, schema v19). Phase ladder 0→5: pre-flight, substrate cert (S1–S24), AI orchestration, autonomous NHI playbook (4 scenarios × 4 arms × n=3 = 48 runs), meta-analysis, verdict. <strong>S23 (#507 tilde-expansion) and S24 (#318 MCP stdio fanout) are expected-RED on v0.6.3.1; expected GREEN on Patch 2.</strong> Findings funnel into <a href="https://github.com/alphaonedev/ai-memory-mcp/issues/511" style="color:var(--gold)">Patch 2 umbrella #511</a>.</p>
+        <a href="https://alphaonedev.github.io/ai-memory-a2a-v0.6.3.1/" style="color:var(--gold)">live results →</a>
+      </div>
       <div class="rel">
         <div class="ver">v0.6.3</div>
         <span class="status shipped">✓ shipped</span>
-        <p>Hierarchy + KG + Capabilities v2 + 93.08% coverage. Ship-gate 4 phases pass · a2a-gate 48 scenarios pass · all 4 distribution channels live (crates.io · Homebrew · Fedora COPR · Docker GHCR).</p>
+        <p>Hierarchy + KG + Capabilities v2 + 93.08% coverage. Ship-gate 4 phases pass · a2a-gate 48 scenarios pass · all 5 distribution channels live (GitHub Release · Homebrew tap · ghcr.io · Fedora COPR · crates.io).</p>
         <a href="releases/v0.6.3/">view evidence →</a>
       </div>
       <div class="rel">
@@ -213,7 +223,7 @@ footer a{color:var(--text-muted)}
 </section>
 
 <footer>
-  <p>ai-memory · Test Hub · Apache 2.0 · created 2026-04-27 to centralize testing evidence for the v0.6.3 release campaign and onward · <a href="https://github.com/alphaonedev/ai-memory-test-hub">GitHub</a></p>
+  <p>ai-memory · Test Hub · Apache 2.0 · created 2026-04-27 to centralize testing evidence for the v0.6.3 release campaign and onward · v0.6.3 shipped 2026-04-27, v0.6.3.1 shipped 2026-04-30 (a2a campaign in flight) · <a href="https://github.com/alphaonedev/ai-memory-test-hub">GitHub</a></p>
 </footer>
 
 </body>
