@@ -1,0 +1,416 @@
+<!--
+  Copyright 2026 AlphaOne LLC
+  SPDX-License-Identifier: Apache-2.0
+  v0.7.0 release — full-spectrum NHI test verdict + post-NHI fixes.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ai-memory · Test Hub · v0.7.0 NHI evidence</title>
+<meta name="description" content="v0.7.0 attested-cortex release — full-spectrum NHI (Non-Human Identity) test results, verdict (SHIP-WITH-NOTES), per-phase evidence, and the post-NHI fixes PR #636.">
+<style>
+:root{--bg:#000;--bg-card:#111;--bg-elev:#161616;--bg-code:#1a1a1a;--border:#262626;--border-hl:#3d3d3d;--text:#fff;--text-muted:#999;--text-dim:#666;--p1:#6ee7ff;--p2:#ffb86b;--p3:#c8a2ff;--good:#6ee7ff;--bad:#ff6b9d;--gold:#ffd700;--font-mono:'SF Mono','Cascadia Code','Fira Code',Consolas,monospace;--font-sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;--max-w:1200px}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:5rem}
+body{font-family:var(--font-sans);background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:var(--text);text-decoration:none}a:hover{color:var(--p1)}
+code{font-family:var(--font-mono);font-size:.85rem;background:var(--bg-code);padding:.1em .35em;border-radius:4px;color:var(--p1)}
+pre{background:var(--bg-code);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;font-size:.82rem;line-height:1.5}
+pre code{background:transparent;padding:0;color:var(--text)}
+.container{max-width:var(--max-w);margin:0 auto;padding:0 1.5rem}
+
+.topnav{position:sticky;top:0;z-index:50;background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.topnav .inner{display:flex;justify-content:space-between;max-width:var(--max-w);margin:0 auto;padding:.9rem 1.5rem;font-size:.875rem;flex-wrap:wrap;gap:.5rem}
+.topnav a{color:var(--text-muted);margin-right:1rem}.topnav a:hover{color:var(--text)}
+.topnav .home-link{color:var(--text);font-weight:600}
+.topnav .right{display:flex;gap:1rem;flex-wrap:wrap}
+
+.hero{padding:4rem 1.5rem 2.5rem;text-align:center;background:radial-gradient(ellipse at center,rgba(110,231,255,0.08),transparent 60%);border-bottom:1px solid var(--border)}
+.hero .eyebrow{margin-bottom:.85rem}
+.hero h1{font-size:clamp(2rem,4.5vw,3.25rem);margin-bottom:.85rem;letter-spacing:-0.02em;line-height:1.1}
+.hero .subtitle{font-family:var(--font-mono);color:var(--text-muted);font-size:.95rem;margin-bottom:1.25rem}
+.hero .verdict{display:inline-block;font-family:var(--font-mono);font-size:.95rem;letter-spacing:.08em;text-transform:uppercase;padding:.5em 1.1em;border-radius:6px;margin-bottom:1rem;font-weight:700}
+.hero .verdict.ship{color:var(--good);background:rgba(110,231,255,0.12);border:1px solid rgba(110,231,255,0.4)}
+.hero p.lede{color:var(--text-muted);max-width:780px;margin:1rem auto 0;font-size:1rem}
+
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-top:2rem}
+.metric{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.25rem;text-align:left}
+.metric .label{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:.4rem}
+.metric .value{font-family:var(--font-mono);font-size:1.4rem;font-weight:700;color:var(--text)}
+.metric .value.good{color:var(--good)}
+.metric .value.warn{color:var(--p2)}
+.metric .sub{font-size:.78rem;color:var(--text-muted);margin-top:.3rem}
+
+section{padding:3rem 0;border-bottom:1px solid var(--border)}
+section.compact{padding:2rem 0}
+.eyebrow{display:inline-block;font-size:.72rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:.5rem;padding:.2rem .6rem;border:1px solid var(--border-hl);border-radius:999px}
+h2{font-family:var(--font-mono);font-size:1.4rem;margin-bottom:.75rem;letter-spacing:-0.01em}
+h3{font-family:var(--font-mono);font-size:1.1rem;margin:1.25rem 0 .5rem;color:var(--text)}
+p.lede{color:var(--text-muted);font-size:.98rem;max-width:780px;margin-bottom:1.5rem}
+ul{padding-left:1.4rem;margin-bottom:1rem}
+ul li{margin-bottom:.4rem;color:var(--text-muted)}
+ul li strong{color:var(--text)}
+
+.phases{display:grid;gap:.6rem;margin-top:1.25rem}
+.phase{display:grid;grid-template-columns:5rem 1fr 8rem 6rem;gap:1rem;align-items:center;padding:.85rem 1.1rem;background:var(--bg-card);border:1px solid var(--border);border-radius:8px}
+.phase .id{font-family:var(--font-mono);font-size:.8rem;color:var(--p1);font-weight:700}
+.phase .name{font-size:.92rem}
+.phase .stats{font-family:var(--font-mono);font-size:.75rem;color:var(--text-muted)}
+.phase .v{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;padding:.2em .55em;border-radius:4px;text-align:center}
+.phase .v.pass{color:var(--good);background:rgba(110,231,255,0.12)}
+.phase .v.partial{color:var(--p2);background:rgba(255,184,107,0.12)}
+.phase .v.gap{color:var(--p3);background:rgba(200,162,255,0.12)}
+@media (max-width:680px){.phase{grid-template-columns:1fr;gap:.4rem}}
+
+.findings{display:grid;gap:.85rem;margin-top:1rem}
+.finding{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:1.15rem 1.25rem}
+.finding .head{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;flex-wrap:wrap;margin-bottom:.55rem}
+.finding .head .id{font-family:var(--font-mono);font-weight:700;color:var(--p1);font-size:.95rem}
+.finding .sev{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;padding:.2em .55em;border-radius:4px}
+.finding .sev.p1{color:var(--p2);background:rgba(255,184,107,0.12)}
+.finding .sev.p2{color:var(--p3);background:rgba(200,162,255,0.12)}
+.finding .sev.p3{color:var(--text-dim);background:rgba(102,102,102,0.15)}
+.finding .sev.closed{color:var(--good);background:rgba(110,231,255,0.12)}
+.finding h3{margin:0 0 .55rem;font-family:var(--font-sans);font-size:1.05rem;font-weight:600}
+.finding p{color:var(--text-muted);font-size:.9rem;margin-bottom:.55rem}
+.finding .resolution{font-family:var(--font-mono);font-size:.78rem;color:var(--text-muted)}
+.finding .resolution strong{color:var(--good)}
+.finding .resolution.deferred strong{color:var(--p2)}
+
+.strengths{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:.85rem;margin-top:1rem}
+.strength{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:1rem 1.15rem}
+.strength h4{font-family:var(--font-mono);font-size:.92rem;color:var(--good);margin-bottom:.4rem}
+.strength p{color:var(--text-muted);font-size:.85rem}
+
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.88rem}
+th,td{padding:.6rem .85rem;text-align:left;border-bottom:1px solid var(--border)}
+th{font-family:var(--font-mono);font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);font-weight:600}
+td{color:var(--text-muted)}
+td:first-child{color:var(--text);font-family:var(--font-mono);font-size:.82rem}
+td .pass{color:var(--good);font-family:var(--font-mono);font-size:.78rem}
+td .partial{color:var(--p2);font-family:var(--font-mono);font-size:.78rem}
+td .gap{color:var(--p3);font-family:var(--font-mono);font-size:.78rem}
+
+.links-row{display:flex;gap:.85rem;flex-wrap:wrap;font-family:var(--font-mono);font-size:.82rem;margin-top:1rem}
+.links-row a{padding:.5rem .95rem;border:1px solid var(--border-hl);border-radius:6px;color:var(--text-muted)}
+.links-row a:hover{color:var(--text);border-color:var(--p1)}
+.links-row a.primary{border-color:var(--p1);color:var(--p1)}
+
+footer{padding:3rem 1.5rem;text-align:center;font-size:.85rem;color:var(--text-dim);border-top:1px solid var(--border)}
+footer a{color:var(--text-muted)}
+
+.note{background:var(--bg-elev);border-left:3px solid var(--p2);padding:.85rem 1.1rem;border-radius:0 6px 6px 0;font-size:.88rem;color:var(--text-muted);margin:1rem 0}
+.note strong{color:var(--text)}
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="inner">
+    <a class="home-link" href="../../">ai-memory · Test Hub</a>
+    <div class="right">
+      <a href="#verdict">Verdict</a>
+      <a href="#phases">Phases</a>
+      <a href="#findings">Findings</a>
+      <a href="#strengths">Strengths</a>
+      <a href="#methodology">Methodology</a>
+      <a href="https://github.com/alphaonedev/ai-memory-mcp/pull/636" style="color:var(--p1)">PR #636 →</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <span class="eyebrow">v0.7.0 attested-cortex · Full-Spectrum NHI Test</span>
+  <h1>v0.7.0 NHI Test — SHIP-WITH-NOTES</h1>
+  <p class="subtitle">12 phases · 51 MCP tools · 175 live memories · 0 outright failures</p>
+  <div class="verdict ship">SHIP-WITH-NOTES</div>
+  <p class="lede">A fresh Claude Code CLI session executed the full Non-Human Identity test playbook end-to-end against the v0.7.0 binary on a live MCP database. 114 PASS, 6 partials, 12 config-gated gaps — zero P0/P1 blockers. The actionable P2 findings landed on PR #636; the surface itself is production-ready.</p>
+  <div class="metrics container">
+    <div class="metric">
+      <div class="label">Tests passed</div>
+      <div class="value good">114 / 132</div>
+      <div class="sub">+ 12 config-gated gaps (defaults-OFF posture)</div>
+    </div>
+    <div class="metric">
+      <div class="label">Cargo test suite</div>
+      <div class="value good">2 883 / 2 883</div>
+      <div class="sub">67 suites · post-fix branch</div>
+    </div>
+    <div class="metric">
+      <div class="label">Trimmed token budget (C5)</div>
+      <div class="value good">2 316</div>
+      <div class="sub">≤ 3 500 ceiling · 1 184 headroom</div>
+    </div>
+    <div class="metric">
+      <div class="label">Top per-tool tokens</div>
+      <div class="value good">522</div>
+      <div class="sub"><code>memory_recall</code> · 35% of 1 500 ceiling</div>
+    </div>
+    <div class="metric">
+      <div class="label">P0 / P1 blockers</div>
+      <div class="value good">0</div>
+      <div class="sub">F1, F5 closed as test-bugs</div>
+    </div>
+    <div class="metric">
+      <div class="label">P2 fixes shipped</div>
+      <div class="value good">3 + helper</div>
+      <div class="sub">F2, F3, F4 helper · PR #636</div>
+    </div>
+  </div>
+</section>
+
+<section id="verdict">
+  <div class="container">
+    <span class="eyebrow">Recommendation</span>
+    <h2>Ship v0.7.0 with release-notes additions.</h2>
+    <p class="lede">The v0.7.0 surface is correct, well-bounded, sanitized, and observable across all 12 NHI test phases. Three P2 fixes plus the F4 opt-in helper landed on PR #636 against <code>release/v0.7.0</code>. Six P3 polish items are appropriate for v0.7.1.</p>
+    <p class="lede">Default-OFF posture for HMAC, audit, signing keys, and <code>[[hooks]]</code> means several #628 audit-blocker probes are untestable until operators opt in. The daemon's first-run UX tells operators exactly how to enable each feature; document this in release notes.</p>
+    <div class="links-row">
+      <a class="primary" href="https://github.com/alphaonedev/ai-memory-mcp/pull/636">PR #636 — post-NHI fixes</a>
+      <a href="https://github.com/alphaonedev/ai-memory-mcp/pull/626">PR #626 — release/v0.7.0 (human-gated)</a>
+      <a href="https://github.com/alphaonedev/ai-memory-mcp/issues/628">issue #628 — audit blockers</a>
+    </div>
+  </div>
+</section>
+
+<section id="phases">
+  <div class="container">
+    <span class="eyebrow">12-phase summary</span>
+    <h2>Per-phase verdicts.</h2>
+    <p class="lede">Each phase produced a single result memory in namespace <code>ai-memory/v0.7.0-nhi-testing</code>; counts below are PASS / partial / config-gap.</p>
+    <div class="phases">
+      <div class="phase"><span class="id">P0</span><span class="name">Environment &amp; version handshake</span><span class="stats">10 / 0 / 0</span><span class="v pass">PASS</span></div>
+      <div class="phase"><span class="id">P1</span><span class="name">Core CRUD smoke (5 tools)</span><span class="stats">6 / 0 / 0</span><span class="v pass">PASS</span></div>
+      <div class="phase"><span class="id">P2</span><span class="name">Lifecycle (5 tools)</span><span class="stats">10 / 0 / 0</span><span class="v pass">PASS</span></div>
+      <div class="phase"><span class="id">P3</span><span class="name">Knowledge graph (Track J)</span><span class="stats">6 / 3 / 0</span><span class="v partial">PASS+</span></div>
+      <div class="phase"><span class="id">P4</span><span class="name">Governance &amp; security hardening</span><span class="stats">22 / 1 / 7</span><span class="v partial">PASS+</span></div>
+      <div class="phase"><span class="id">P5</span><span class="name">Power tools (autonomous tier)</span><span class="stats">8 / 0 / 0</span><span class="v pass">PASS</span></div>
+      <div class="phase"><span class="id">P6</span><span class="name">Capabilities v3 + runtime expansion</span><span class="stats">8 / 0 / 0</span><span class="v pass">PASS</span></div>
+      <div class="phase"><span class="id">P7</span><span class="name">Token-budget verification (Track C)</span><span class="stats">7 / 0 / 0</span><span class="v pass">PASS</span></div>
+      <div class="phase"><span class="id">P8</span><span class="name">Hooks &amp; integrations</span><span class="stats">4 / 0 / 2</span><span class="v gap">PASS·gap</span></div>
+      <div class="phase"><span class="id">P9</span><span class="name">Cross-interface parity (CLI / HTTP / MCP)</span><span class="stats">13 / 2 / 0</span><span class="v partial">PASS+</span></div>
+      <div class="phase"><span class="id">P10</span><span class="name">Performance &amp; scale</span><span class="stats">8 / 0 / 1</span><span class="v pass">PASS</span></div>
+      <div class="phase"><span class="id">P11</span><span class="name">Failure &amp; chaos</span><span class="stats">12 / 0 / 2</span><span class="v pass">PASS</span></div>
+    </div>
+    <div class="note"><strong>Convention:</strong> partial = surface correct but config-gated or playbook-conditional. gap = feature wired but config-OFF on the test machine (HMAC, signing keys, [[hooks]]). Zero outright failures across all 12 phases.</div>
+  </div>
+</section>
+
+<section id="findings">
+  <div class="container">
+    <span class="eyebrow">Findings &amp; resolutions</span>
+    <h2>Six findings, four code paths touched, two test-bugs.</h2>
+    <p class="lede">Each finding's resolution is linked to commits or memory-namespace entries. Findings F1 and F5 closed as test-bugs (the NHI test used the wrong header name). F2, F3, F4 helper landed on PR #636. F6 closed as already-documented.</p>
+
+    <div class="findings">
+      <div class="finding">
+        <div class="head">
+          <span class="id">F1</span><span class="sev closed">closed · test-bug</span>
+        </div>
+        <h3>HTTP <code>X-AI-Memory-Agent-Id</code> header silently ignored</h3>
+        <p>P9 testing observed that even valid <code>X-AI-Memory-Agent-Id</code> header values were dropped to <code>anonymous:req-…</code>. Investigation confirmed the actual header name is <code>X-Agent-Id</code> (per <code>src/identity/mod.rs::resolve_http_agent_id</code> and CLAUDE.md §"Agent Identity (NHI)"). Re-test with the correct name: valid → 201 stamped, malformed → 400 with regex error, body field wins precedence per documented order.</p>
+        <p class="resolution"><strong>Closed</strong> · erratum stored at memory id <code>3f12ea8a</code> · no code change needed.</p>
+      </div>
+
+      <div class="finding">
+        <div class="head">
+          <span class="id">F2</span><span class="sev p2">P2 · fixed</span>
+        </div>
+        <h3><code>entity_register</code> persists <code>canonical_name</code> as alias (NHI-P3-T2)</h3>
+        <p>Registering an entity with no aliases left it unreachable: <code>memory_entity_get_by_alias("&lt;canonical_name&gt;")</code> returned <code>found:false</code> because the canonical name was never written into <code>entity_aliases</code>. Fix auto-inserts <code>canonical_name</code> as the first alias and de-duplicates against caller-supplied entries. Three test updates + one new regression test (<code>entity_register_canonical_name_resolves_via_get_by_alias</code>).</p>
+        <p class="resolution"><strong>Fixed</strong> in PR #636 · <code>src/db.rs::entity_register</code></p>
+      </div>
+
+      <div class="finding">
+        <div class="head">
+          <span class="id">F3</span><span class="sev p2">P2 · fixed</span>
+        </div>
+        <h3><code>kg_query</code> / <code>find_paths</code> default to "current view" (NHI-P3-T7)</h3>
+        <p><code>memory_kg_invalidate</code> populated <code>valid_until</code> correctly, but the default <code>kg_query</code> / <code>find_paths</code> traversal still surfaced edges whose <code>valid_until</code> lay in the past. Added an <code>include_invalidated: bool</code> parameter (default false) that injects <code>(valid_until IS NULL OR valid_until &gt; now())</code> into the per-hop filter. <code>memory_kg_timeline</code> still returns the full history (its purpose). Both MCP and HTTP surfaces expose the toggle. Two regression tests.</p>
+        <p class="resolution"><strong>Fixed</strong> in PR #636 · <code>src/db.rs::kg_query</code> / <code>src/db.rs::find_paths</code></p>
+      </div>
+
+      <div class="finding">
+        <div class="head">
+          <span class="id">F4</span><span class="sev p2">P2 · helper-only</span>
+        </div>
+        <h3>Default namespace standard governance is <code>write=any</code> (NHI-P4-T19)</h3>
+        <p>Setting a standard wires the rule but doesn't enforce. Added a documented opt-in helper <code>GovernancePolicy::default_for_managed_namespace()</code> returning <code>{write:Owner, promote:Any, delete:Owner, approver:Human, inherit:true}</code> for operators to paste into a standard memory's <code>metadata.governance</code>. Changing the implicit fallback in <code>read_namespace_policy</code> would break inheritance chains where parent and child standards were registered under distinct agent identities (the <code>test_inherit_*_chain</code> integration suite documents the constraint). The implicit-default change is deferred to v0.7.1 with migration notes.</p>
+        <p class="resolution deferred"><strong>Helper landed</strong> in PR #636 · implicit fallback change deferred to v0.7.1</p>
+      </div>
+
+      <div class="finding">
+        <div class="head">
+          <span class="id">F5</span><span class="sev closed">closed · test-bug</span>
+        </div>
+        <h3>HTTP doesn't 400 on malformed <code>X-AI-Memory-Agent-Id</code> header</h3>
+        <p>Same root cause as F1 — the NHI test used the wrong header name. With the correct <code>X-Agent-Id</code>, the daemon returns <code>HTTP 400 {"error":"invalid agent_id: agent_id contains invalid character ';' (allowed: alphanumeric, _-:@./)"}</code>.</p>
+        <p class="resolution"><strong>Closed</strong> · erratum at memory <code>3f12ea8a</code> · no code change needed.</p>
+      </div>
+
+      <div class="finding">
+        <div class="head">
+          <span class="id">F6</span><span class="sev closed">closed · already documented</span>
+        </div>
+        <h3><code>verbose=true</code> on <code>memory_capabilities</code> doesn't include per-tool schemas</h3>
+        <p>The existing capabilities docstring already correctly documents that <code>verbose=true</code> only emits per-tool docs and full inputSchema when paired with <code>family=&lt;name&gt;</code> + <code>include_schema=true</code>. The NHI test was reading the surface incorrectly, not the surface being incorrect. No code change.</p>
+        <p class="resolution"><strong>Closed</strong> · existing docstring at <code>src/mcp.rs:919</code> covers the requirement.</p>
+      </div>
+
+      <div class="finding">
+        <div class="head">
+          <span class="id">P3 polish</span><span class="sev p3">P3 · v0.7.1</span>
+        </div>
+        <h3>Carry-over polish for v0.7.1</h3>
+        <p>HNSW eventual-consistency lag observable on freshly-stored memories · <code>potential_contradictions</code> write-time hint threshold tightening · CLI <code>link</code> path produces unsigned edges (Track H signing requires <code>ai-memory identity generate</code> first — already shown in daemon log) · mid-tier TTL on first access shrinks 7d → 24h (a forcing function for auto-promote at 5 accesses; counterintuitive without docs) · <code>memory_get_taxonomy</code> returns JSON tree, not the ASCII tree the playbook anticipated · HTTP <code>{memory, links}</code> envelope vs MCP top-level shape diverge by one layer.</p>
+        <p class="resolution"><strong>Documented</strong> in the verdict memory · scoped to v0.7.1 follow-up.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="strengths">
+  <div class="container">
+    <span class="eyebrow">What worked great</span>
+    <h2>Standout strengths.</h2>
+    <p class="lede">A tight summary of the surface-level wins from the NHI run — every one verifiable from the per-phase memories.</p>
+
+    <div class="strengths">
+      <div class="strength">
+        <h4>Token economy</h4>
+        <p>Trimmed profile 2 316 tokens (1 184 under the 3 500 ceiling). Verbose 9 008. Max single tool: <code>memory_recall</code> at 522 (35% of the 1 500 per-tool ceiling). 73.9% savings on a <code>core</code>-only profile.</p>
+      </div>
+      <div class="strength">
+        <h4>Comprehensive SSRF surface</h4>
+        <p>Loopback rejected with explicit opt-in, 169.254.0.0/16 link-local rejected on both HTTP and HTTPS, RFC1918 rejected, <code>file://</code> scheme rejected, plaintext HTTP to non-loopback rejected. All errors sanitized with actionable opt-in flags.</p>
+      </div>
+      <div class="strength">
+        <h4>Subscription retry / DLQ / replay</h4>
+        <p>Real webhook delivery to <code>example.com</code> → 4 retries → DLQ entry with correlation_id → <code>memory_subscription_replay</code> returns the failed event with <code>delivery_status</code>. The v0.6.4 #615 dispatch_count semantic is observable end-to-end.</p>
+      </div>
+      <div class="strength">
+        <h4>Distinct provenance per interface</h4>
+        <p>agent_id prefixes (<code>ai:</code> MCP / <code>host:</code> CLI / <code>anonymous:req-</code> HTTP) plus <code>source</code> field (<code>claude</code> / <code>cli</code> / <code>api</code>) make audit trails unambiguous. One of v0.7.0's nicest observability wins.</p>
+      </div>
+      <div class="strength">
+        <h4>agent_id immutability holds</h4>
+        <p>No CLI flag exposes <code>metadata.agent_id</code> mutation. Explicit override attempts (<code>--agent-id "evil"</code>) only set the requester, never the stored stamp. SQL-layer + caller-layer preservation per playbook spec.</p>
+      </div>
+      <div class="strength">
+        <h4>Upsert by (title, namespace) under concurrency</h4>
+        <p>5 racing writers all returned the same memory id; last-write-wins for content; no orphans, no duplicates. Stable IDs survive races (good for KG link integrity).</p>
+      </div>
+      <div class="strength">
+        <h4>All three external models wired</h4>
+        <p>nomic-embed-text-v1.5 (cosine in <code>check_duplicate</code> at 0.902 sim), ms-marco-MiniLM-L-6-v2 (rerank top-1 accuracy 100% on 8 concurrent topical queries), gemma4:e4b (expand_query, consolidate, auto_tag, detect_contradiction). Zero crashes.</p>
+      </div>
+      <div class="strength">
+        <h4>Auto-promote at access_count=5</h4>
+        <p>Mid-tier memory hit 5 accesses → silently promoted to long, <code>expires_at</code> cleared. Tier no-downgrade enforced (CLI <code>--tier short</code> on a long memory was refused).</p>
+      </div>
+      <div class="strength">
+        <h4>Archive-before-delete on forget + GC</h4>
+        <p><code>memory_forget</code> returned <code>{archived:true, deleted:N}</code>; <code>archive_stats</code> grew correspondingly. Recoverable deletions via <code>memory_archive_restore</code>.</p>
+      </div>
+      <div class="strength">
+        <h4>Daemon UX hygiene</h4>
+        <p>TLS-not-enabled warning ("set --tls-cert + --tls-key + --mtls-allowlist"), key-dir-missing message ("run <code>ai-memory identity generate ...</code>"), and SSRF errors all tell the operator exactly how to fix the situation. Top-tier operator-facing diagnostics.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="ratings">
+  <div class="container">
+    <span class="eyebrow">Phase-by-phase</span>
+    <h2>Detailed counts per phase.</h2>
+    <table>
+      <thead>
+        <tr><th>Phase</th><th>Pass</th><th>Partial</th><th>Gap</th><th>Disposition</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>P0 Environment</td><td><span class="pass">10</span></td><td>0</td><td>0</td><td>clean v0.7.0, schema=28, 8/8 families, A1 wired</td></tr>
+        <tr><td>P1 Core CRUD</td><td><span class="pass">6</span></td><td>0</td><td>0</td><td>round-trip clean, agent_id immutability holds</td></tr>
+        <tr><td>P2 Lifecycle</td><td><span class="pass">10</span></td><td>0</td><td>0</td><td>auto-promote @5, no-downgrade, archive-before-delete</td></tr>
+        <tr><td>P3 Knowledge graph</td><td><span class="pass">6</span></td><td><span class="partial">3</span></td><td>0</td><td>kg core works; entity-alias resolution + current-view filter fixed in PR #636</td></tr>
+        <tr><td>P4 Governance &amp; sec</td><td><span class="pass">22</span></td><td><span class="partial">1</span></td><td><span class="gap">7</span></td><td>SSRF guards excellent, retry/DLQ/replay clean, default-OFF posture</td></tr>
+        <tr><td>P5 Power tools</td><td><span class="pass">8</span></td><td>0</td><td>0</td><td>all 6 LLM/embedder tools work end-to-end at autonomous tier</td></tr>
+        <tr><td>P6 Capabilities v3</td><td><span class="pass">8</span></td><td>0</td><td>0</td><td>v1/v2/v3 versioning + family scoping + runtime expansion all wired</td></tr>
+        <tr><td>P7 Token budget</td><td><span class="pass">7</span></td><td>0</td><td>0</td><td>trimmed=2316/3500, no per-tool &gt;1500, savings 73.9% on core</td></tr>
+        <tr><td>P8 Hooks</td><td><span class="pass">4</span></td><td>0</td><td><span class="gap">2</span></td><td>events fire, batched rerank clean, G3 + ExecExecutor config-gated</td></tr>
+        <tr><td>P9 Cross-interface</td><td><span class="pass">13</span></td><td><span class="partial">2</span></td><td>0</td><td>MCP/CLI clean, HTTP <code>X-Agent-Id</code> works as documented</td></tr>
+        <tr><td>P10 Performance</td><td><span class="pass">8</span></td><td>0</td><td><span class="gap">1</span></td><td>within budgets, 0 evictions, 0 dim violations</td></tr>
+        <tr><td>P11 Chaos</td><td><span class="pass">12</span></td><td>0</td><td><span class="gap">2</span></td><td>clean error envelopes, upsert correct, doctor INFO post-chaos</td></tr>
+        <tr><td><strong>Total</strong></td><td><strong><span class="pass">114</span></strong></td><td><strong><span class="partial">6</span></strong></td><td><strong><span class="gap">12</span></strong></td><td><strong>SHIP-WITH-NOTES</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="methodology">
+  <div class="container">
+    <span class="eyebrow">How this run was conducted</span>
+    <h2>NHI testing methodology.</h2>
+    <p class="lede">A "Non-Human Identity" test boots an AI agent into a fresh Claude Code CLI session against the actual v0.7.0 binary on a live MCP database — no mocks, no stubs. The session executes a 12-phase playbook persisted in the <code>ai-memory/v0.7.0-nhi-testing</code> namespace and writes one result memory per phase plus a final verdict.</p>
+
+    <h3>Pre-flight</h3>
+    <ul>
+      <li><strong>Binary:</strong> <code>ai-memory 0.7.0</code>, commit <code>fcdd2a5</code> ("chore(release): v0.7.0 — attested-cortex (epic complete; 69/69 tasks)")</li>
+      <li><strong>Symlink:</strong> <code>/opt/homebrew/bin/ai-memory → /Users/fate/v07/v07-f5/target/release/ai-memory</code></li>
+      <li><strong>DB:</strong> <code>/Users/fate/.claude/ai-memory.db</code>, schema_version=28</li>
+      <li><strong>Tier:</strong> autonomous (embedder=nomic-embed-text-v1.5, reranker=ms-marco-MiniLM-L-6-v2, llm=gemma4:e4b)</li>
+      <li><strong>Models loaded:</strong> 768-dim embeddings, neural reranker, gemma4:e4b LLM via Ollama</li>
+    </ul>
+
+    <h3>Phase progression</h3>
+    <ul>
+      <li><strong>P0–P1</strong> verify pre-flight: version, schema, capabilities (Track A1 surface — <code>schema_version=3</code> with <code>summary</code> + <code>to_describe_to_user</code> fields), and core CRUD round-trip.</li>
+      <li><strong>P2</strong> exercises the lifecycle path: 6h short TTL, auto-promote at <code>access_count=5</code>, tier no-downgrade, explicit promote, surgical-vs-bulk forget, archive-before-delete, GC.</li>
+      <li><strong>P3</strong> exercises the knowledge graph: register entities + aliases, link memories with all four relation types, kg_query at depths 1..5, find_paths multi-path enumeration, kg_timeline temporal validity, kg_invalidate, taxonomy.</li>
+      <li><strong>P4</strong> probes governance + security: namespace standards, pending approve/reject, subscriptions with 5 SSRF probes (loopback / link-local / RFC1918 / file:// / plaintext-non-loopback), webhook event firing, retry ladder, DLQ, replay, agent_register gate, quota status, signed_events ledger.</li>
+      <li><strong>P5</strong> exercises the autonomous-tier power tools: check_duplicate (HNSW + cosine), consolidate (with provenance metadata), expand_query (LLM), auto_tag (LLM), detect_contradiction (LLM), inbox.</li>
+      <li><strong>P6</strong> verifies the capabilities v3 surface: <code>accept=v1</code> legacy shape, <code>family=graph</code> filtered, <code>include_schema=true</code> runtime-expansion, <code>memory_smart_load</code> embedder-routed family selection.</li>
+      <li><strong>P7</strong> measures the token budget per Track C: <code>doctor --tokens --json</code> and <code>--raw-table</code>, with the 3 500 trimmed ceiling and 1 500 per-tool ceiling as gates.</li>
+      <li><strong>P8</strong> covers hooks &amp; integrations: webhook event coverage, end-to-end firing, 8-concurrent rerank latency, G3 stderr drain (config-gated), ExecExecutor failure surfacing (config-gated).</li>
+      <li><strong>P9</strong> exercises cross-interface parity: MCP↔CLI↔HTTP round-trip, distinct interface stamps, agent_id validation regex parity (CLI rejected on metacharacters; HTTP same with the correct <code>X-Agent-Id</code> header).</li>
+      <li><strong>P10</strong> times recall (cold-start p50 24.4 ms, p95 32.0 ms — process-spawn dominated; in-process server-side recall is sub-millisecond), checks <code>memory_stats</code>, verifies no HNSW evictions and no dim_violations.</li>
+      <li><strong>P11</strong> closes with chaos: malformed JSON-RPC, missing required fields, invalid <code>tier</code> enum, content-size cap (precisely 64 KiB inclusive), 5 concurrent racing stores → exact-upsert, <code>doctor</code> post-chaos clean.</li>
+    </ul>
+
+    <h3>Result conventions</h3>
+    <p>Each phase result memory carries: title <code>NHI-P&lt;N&gt;-&lt;short-name&gt;</code>, namespace <code>ai-memory/v0.7.0-nhi-testing</code>, tier <code>long</code>, priority 8 (9 if blocker found), tags <code>["v0.7.0", "nhi-testing", "phase-N", "&lt;area&gt;"]</code>. The final verdict carries priority 10 and tags <code>["verdict", "ship-readiness", "summary"]</code>.</p>
+
+    <h3>Recall the verdict</h3>
+    <pre><code>memory_recall context="v0.7.0 verdict" namespace="ai-memory/v0.7.0-nhi-testing"</code></pre>
+  </div>
+</section>
+
+<section class="compact">
+  <div class="container">
+    <span class="eyebrow">v0.7.0 charter recap</span>
+    <h2>"Attested-cortex" — what shipped.</h2>
+    <p class="lede">v0.7.0 closed 69 / 69 epic tasks across 11 tracks (A through K) plus 15 audit-blocker fixes from <a href="https://github.com/alphaonedev/ai-memory-mcp/issues/628">issue #628</a> (PRs #629 through #634, all merged 2026-05-07).</p>
+    <ul>
+      <li><strong>Track A</strong> — capabilities v3 with <code>summary</code> + <code>to_describe_to_user</code> + per-family runtime expansion</li>
+      <li><strong>Track B</strong> — pre-computed family-descriptor embeddings; <code>memory_smart_load</code> intent routing without LLM round-trip</li>
+      <li><strong>Track C</strong> — token-budget governance (≤ 3 500 trimmed, ≤ 1 500 per tool); <code>verbose=true</code> opt-in for full inputSchema</li>
+      <li><strong>Track G</strong> — hooks pipeline (G1–G11), webhook event surface, retry ladder, DLQ</li>
+      <li><strong>Track H</strong> — Ed25519 signed events, attest_level, identity key directory, link signing</li>
+      <li><strong>Track I</strong> — invalidate-link, K9 authz, replay, zstd bomb cap, subscription replay</li>
+      <li><strong>Track J</strong> — KG query layer (J1–J11), find_paths, kg_timeline, kg_invalidate, AGE-CTE acceleration onramp</li>
+      <li><strong>Track K</strong> — governance (K7–K11): SSRF guards, HMAC replay window, SSE tenant isolation, namespace standards, quota TOCTOU</li>
+    </ul>
+    <p class="lede" style="margin-top:1rem">The NHI test verifies the released bits behave as advertised when an AI agent uses them through the documented surfaces.</p>
+  </div>
+</section>
+
+<footer>
+  <p>v0.7.0 NHI test artifacts are persisted in the <code>ai-memory/v0.7.0-nhi-testing</code> memory namespace.</p>
+  <p style="margin-top:.5rem"><a href="../../">← Test Hub</a> &nbsp;·&nbsp; <a href="https://github.com/alphaonedev/ai-memory-mcp">ai-memory-mcp</a> &nbsp;·&nbsp; <a href="https://github.com/alphaonedev/ai-memory-test-hub">test-hub</a></p>
+  <p style="margin-top:.85rem;font-size:.78rem">© 2026 AlphaOne LLC · Apache-2.0</p>
+</footer>
+
+</body>
+</html>

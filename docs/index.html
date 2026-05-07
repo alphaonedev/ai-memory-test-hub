@@ -70,6 +70,7 @@ footer a{color:var(--text-muted)}
     <div class="right">
       <a href="parallel-testing.html">Parallel Strategy</a>
       <a href="orchestration.html">Orchestration</a>
+      <a href="releases/v0.7.0/" style="color:var(--p1)">v0.7.0 NHI evidence</a>
       <a href="https://alphaonedev.github.io/ai-memory-a2a-v0.6.3.1/" style="color:var(--gold)">v0.6.3.1 a2a (live)</a>
       <a href="releases/v0.6.3/">v0.6.3 evidence</a>
       <a href="https://alphaonedev.github.io/ai-memory-mcp/">← ai-memory</a>
@@ -146,6 +147,12 @@ footer a{color:var(--text-muted)}
     <h2 style="font-family:var(--font-sans);font-size:1.75rem;margin-bottom:.5rem">Pick a release.</h2>
     <p class="lede">Each release gets one evidence page with the gate-by-gate results and the verdict. The current in-flight release is at the top. The pattern going forward is one <code>ai-memory-a2a-v&lt;version&gt;</code> repo per release; the umbrella <code>ai-memory-ai2ai-gate</code> stays the spec.</p>
     <div class="releases">
+      <div class="rel" style="border-color:var(--p1);box-shadow:0 0 0 1px rgba(110,231,255,0.18)">
+        <div class="ver">v0.7.0</div>
+        <span class="status testing" style="color:var(--p1);background:rgba(110,231,255,0.12)">▶ NHI tested · ship-with-notes</span>
+        <p>"Attested-cortex" release — 69/69 epic tasks across 11 tracks (A–K) plus 15 audit-blocker fixes from issue #628. Full-spectrum NHI test (Non-Human Identity) ran the 12-phase playbook against the released v0.7.0 binary on a live MCP database. Result: <strong>114 PASS / 0 FAIL</strong>, 3 P2 fixes shipped on PR #636 against <code>release/v0.7.0</code>, F1 + F5 closed as test-bugs (wrong header name).</p>
+        <a href="releases/v0.7.0/">v0.7.0 NHI evidence →</a>
+      </div>
       <div class="rel" style="border-color:var(--gold);box-shadow:0 0 0 1px rgba(255,215,0,0.15)">
         <div class="ver">v0.6.3.1</div>
         <span class="status testing">▶ testing in flight</span>
