@@ -131,6 +131,7 @@ footer a{color:var(--text-muted)}
   <div class="inner">
     <a class="home-link" href="../../">ai-memory · Test Hub</a>
     <div class="right">
+      <a href="#fix-campaign" style="color:var(--good);font-weight:600">Fix campaign</a>
       <a href="#round2" style="color:var(--p2);font-weight:600">Round 2</a>
       <a href="#verdict">Round 1</a>
       <a href="#phases">Phases</a>
@@ -148,9 +149,10 @@ footer a{color:var(--text-muted)}
   <p class="subtitle">Round 1: 12 phases · Round 2: 5 parallel sub-agents against the post-fix binary</p>
   <div class="verdict-row">
     <div class="verdict ship"><span class="label">Round 1</span>SHIP-WITH-NOTES</div>
-    <div class="verdict hold"><span class="label">Round 2 (current)</span>HOLD-TAG · F6/F7/F8</div>
+    <div class="verdict hold"><span class="label">Round 2</span>HOLD-TAG · F6/F7/F8</div>
+    <div class="verdict ship"><span class="label">Fixes (current)</span>READY · PR #643</div>
   </div>
-  <p class="lede"><strong>Round 1</strong> ran the 12-phase NHI playbook; result was 114 PASS / 6 partial / 12 config-gap / 0 outright fail with three P2 fixes shipped on PR #636. <strong>Round 2</strong> dispatched 5 parallel sub-agents against the post-fix binary to verify the fixes held and to attack the surface from new angles. Round-1 fixes (F2, F3, F4-helper) all verified clean — but Round 2 surfaced three new release-blocking issues: F6 (LLM-dispatch deadlock + silent recall degradation + daemon crash), F7 (HTTP store path bypasses quota counters), and F8 (<code>permissions.mode=advisory</code> default disables write enforcement). Tag v0.7.0 only after these are resolved or explicitly downgraded with documentation.</p>
+  <p class="lede"><strong>Round 1</strong> ran the 12-phase NHI playbook (114 PASS / 6 partial / 12 config-gap / 0 fail; three P2 fixes shipped on PR #636). <strong>Round 2</strong> dispatched 5 parallel sub-agents against the post-fix binary and surfaced three blockers (F6 LLM-dispatch deadlock + silent recall degradation, F7 HTTP store path bypasses quota counters, F8 <code>permissions.mode=advisory</code> default disables write enforcement) plus 10 release-notes items (F9–F18). <strong>Fix campaign</strong> dispatched 5 parallel fix-agents in worktree-isolated branches; nine commits later <strong>all 13 findings are resolved on PR #643</strong> (targeting <code>post-nhi-fixes</code>). All four CLAUDE.md gates pass: 2 973 tests / 0 fail / 11 ignored across 81 binaries, clippy <code>::pedantic</code> clean, fmt clean. Round-3 verification (fresh Claude Code session against the rebuilt binary) is the final gate before the tag.</p>
   <div class="metrics container">
     <div class="metric">
       <div class="label">Round 1 — tests passed</div>
@@ -160,22 +162,22 @@ footer a{color:var(--text-muted)}
     <div class="metric">
       <div class="label">Round 2 — agent aggregate</div>
       <div class="value warn">26 PASS / 4 FAIL</div>
-      <div class="sub">3 partial · 4 schema-gap · 4 fails all gated by F6</div>
+      <div class="sub">4 fails all gated by F6 (now fixed)</div>
     </div>
     <div class="metric">
-      <div class="label">Round 1 fixes verified</div>
-      <div class="value good">3 / 3</div>
-      <div class="sub">F2, F3, F4-helper · PASS in Round 2</div>
+      <div class="label">Round 1 + 2 fixes shipped</div>
+      <div class="value good">16 / 16</div>
+      <div class="sub">F2–F4 (PR #636) + F6–F18 (PR #643)</div>
     </div>
     <div class="metric">
-      <div class="label">New Round-2 blockers</div>
-      <div class="value warn">3</div>
-      <div class="sub">F6 · F7 · F8 (security-default callout)</div>
+      <div class="label">cargo test (post-fix)</div>
+      <div class="value good">2 973 / 2 984</div>
+      <div class="sub">0 failed · 11 ignored · 81 binaries green</div>
     </div>
     <div class="metric">
-      <div class="label">Round 2 — release-notes items</div>
-      <div class="value">10</div>
-      <div class="sub">F9–F18 · doc / surface / UX</div>
+      <div class="label">CLAUDE.md gates</div>
+      <div class="value good">4 / 4</div>
+      <div class="sub">fmt · clippy::pedantic · test · build</div>
     </div>
     <div class="metric">
       <div class="label">Round 2 — perf baseline</div>
@@ -275,9 +277,92 @@ footer a{color:var(--text-muted)}
     <h3>Recall the Round-2 verdict</h3>
     <pre><code>memory_recall context="v0.7.0 Round-2 verdict" namespace="ai-memory/v0.7.0-nhi-round-2"</code></pre>
     <div class="links-row">
-      <a class="primary" href="https://github.com/alphaonedev/ai-memory-mcp/pull/636">PR #636 — post-NHI fixes (open)</a>
+      <a class="primary" href="https://github.com/alphaonedev/ai-memory-mcp/pull/643">PR #643 — Round-2 fix campaign (open · all 13 findings resolved)</a>
+      <a href="https://github.com/alphaonedev/ai-memory-mcp/pull/636">PR #636 — post-NHI fixes (parent)</a>
       <a href="https://github.com/alphaonedev/ai-memory-mcp/pull/626">PR #626 — release/v0.7.0 (human-gated)</a>
+      <a href="#fix-campaign">↓ fix campaign detail</a>
       <a href="#verdict">↓ Round 1 evidence</a>
+    </div>
+  </div>
+</section>
+
+<section id="fix-campaign">
+  <div class="container">
+    <span class="eyebrow">Fix campaign · PR #643 · all blockers resolved</span>
+    <h2>Five parallel fix-agents · 13 findings · 9 commits · all gates green.</h2>
+    <p class="lede">After the operator's "FIX ALL OF IT — time is not a factor" go-ahead, the orchestrator dispatched 5 fix-agents in parallel (worktree-isolated where supported), each owning a strict file-bucket to prevent collisions. Findings fan-in cleanly to the matching agent; the integrator stitched γ's helpers into <code>daemon_runtime::serve()</code> and ε's <code>check_duplicate_with_text</code> into the MCP + HTTP call sites. All four CLAUDE.md gates pass on the merged branch.</p>
+
+    <h3>Per-agent ownership and outcomes</h3>
+    <div class="agents">
+      <div class="agent-card">
+        <div class="head"><span class="id">Fix-Agent α</span><span class="sev closed">F6 · LLM dispatch root-caused</span></div>
+        <h3>F6 — LLM dispatch deadlock + recall consistency</h3>
+        <p><strong>Root cause:</strong> <code>mcp::run_mcp_server</code> is a sync stdin-reader using <code>reqwest::blocking::Client</code>, but it was being awaited from inside an <code>async fn</code> body in <code>daemon_runtime::run</code>. That pinned a tokio worker on the blocking stdin read (the 99.3% <code>clock_gettime</code> busy-loop) AND issued blocking reqwest from inside an active tokio runtime context (the "Failed to send chat request" error). <strong>Fix:</strong> wrap the MCP loop in <code>tokio::task::spawn_blocking</code> so it owns its own dedicated thread outside tokio's polling. Plus 5s connect timeout, 3-failure-in-30s circuit breaker (5xx + network only — 4xx doesn't trip), and the new <code>EmbedStatus { Indexed, Skipped, Failed }</code> enum + 64 KiB cap that β consumes for HTTP F10. <code>compute_recall_mode</code> already returned <code>Hybrid</code> based on <code>embedder_loaded</code> only, ignoring LLM availability — exactly the right semantic; pinned with a regression test.</p>
+        <div class="stats"><span class="pass">commit ecdae2a · 4 files +618 / −11 · 5 tests pass in 0.12s</span></div>
+      </div>
+
+      <div class="agent-card">
+        <div class="head"><span class="id">Fix-Agent β</span><span class="sev closed">F7 + F9 + F10 · HTTP path</span></div>
+        <h3>HTTP quota wiring · 400 not 422 · embed status surfaced</h3>
+        <p><strong>F7:</strong> <code>handlers::create_memory</code> now calls <code>quotas::check_and_record</code> ahead of <code>db::insert</code> with <code>quotas::refund_op</code> on insert failure — mirrors <code>src/mcp.rs</code>. Quota breaches return 429 with envelope <code>{ code, limit, current, max, agent_id }</code>. Empty <code>agent_id</code> still bypasses (anonymous semantics preserved). <strong>F9:</strong> introduced <code>JsonOrBadRequest&lt;T&gt;</code> custom <code>FromRequest</code> extractor that folds every <code>JsonRejection</code> into <code>400 Bad Request + { "error": "missing required field: ...", "fields": [...] }</code>. Identifier-charset allowlist on extracted field names prevents body content from leaking. <strong>F10:</strong> consumes α's <code>EmbedStatus</code>; non-<code>Indexed</code> outcomes add <code>embed_status</code> + <code>embed_status_reason</code> to the 201 body. Success path stays silent.</p>
+        <div class="stats"><span class="pass">commit f9ef40a · handlers.rs +257 / −17 · 9 new tests pass</span></div>
+      </div>
+
+      <div class="agent-card">
+        <div class="head"><span class="id">Fix-Agent γ</span><span class="sev closed">F8 + F11 + F12 · defaults &amp; safety</span></div>
+        <h3>Secure-by-default · forget safety rail · keypair auto-gen</h3>
+        <p><strong>F8:</strong> added <code>default_v07_secure_mode</code> + <code>resolve_v07_default_mode</code> + <code>startup_banner_line</code> in <code>permissions.rs</code>, and a new <code>cli/serve_banner.rs</code> with pure <code>compose_banner(BannerInputs) → Vec&lt;BannerLine&gt;</code>. Daemon's <code>serve()</code> body now routes Info → <code>tracing::info!</code>, Warn → <code>tracing::warn!</code> — operators see <code>permissions: enforce</code> + the v0.7 migration warning at boot. <strong>F11:</strong> added <code>--confirm-global</code> flag to <code>forget</code>; bails with the documented message when <code>--namespace</code> is absent and <code>--pattern</code> or <code>--tier</code> is set. <strong>F12:</strong> added <code>EnsureOutcome { AlreadyExists, Generated, SkippedDisabled }</code> + <code>ensure_keypair</code> helper in <code>identity/keypair.rs</code> — idempotent, never overwrites, integrator wires it into <code>serve()</code> with the well-known <code>daemon</code> agent_id.</p>
+        <div class="stats"><span class="pass">commit 579afe2 · 6 files modified · 39 new tests pass</span></div>
+      </div>
+
+      <div class="agent-card">
+        <div class="head"><span class="id">Fix-Agent δ</span><span class="sev closed">F13 + F14 + F15 + F16 · MCP surface</span></div>
+        <h3>capabilities matrix · smart-load · store metadata · agent_type</h3>
+        <p><strong>F13:</strong> declared <code>accept</code> / <code>family</code> / <code>include_schema</code> / <code>verbose</code> in the inputSchema; wired <code>verbose=true</code> to emit <code>tools[].docstring</code>; wired <code>include_schema=true</code> to populate <code>tools[].inputSchema</code>; added <code>effective_tier_label()</code> overlay (one tier source of truth); reconciled "51 of 51" vs "50 memory tools" off-by-one. <strong>F14:</strong> rebalanced smart-load with composite scoring (2× descriptor + 1× tool-distinct-sum + 2× tool-distinct-max + 4× full-id-hit) + 5-char-prefix relaxed match — "send a notification..." → <code>other</code>, "expand a query..." → <code>power</code>; all 8 originally-passing intents still route correctly. <strong>F15:</strong> verified <code>metadata</code> / <code>tier</code> / <code>priority</code> / <code>tags</code> already in the schema; pinned with regression tests. <strong>F16:</strong> opened <code>agent_type</code> schema to <code>type: "string"</code> with curated description (daemon was already permissive; schema-server mismatch closed in favor of the daemon).</p>
+        <div class="stats"><span class="pass">commit 66f48ae · mcp.rs major edits · 25 new tests pass</span></div>
+      </div>
+
+      <div class="agent-card">
+        <div class="head"><span class="id">Fix-Agent ε</span><span class="sev closed">F17 + F18 · KG + dedup polish</span></div>
+        <h3>find_paths surface · check_duplicate exact-match short-circuit</h3>
+        <p><strong>F17:</strong> rewrote <code>find_paths</code> bail message to name the constant (<code>FIND_PATHS_MAX_DEPTH</code>) and the maintainer-escalation path; added a Directionality contract section to the doc comment (<code>find_paths</code> UNDIRECTED via <code>UNION ALL</code>, <code>kg_query</code> DIRECTED, both honor <code>include_invalidated</code> identically). <strong>F18:</strong> added <code>canonical_content_hash</code> (SHA-256 of UTF-8, no normalization, uses already-vendored <code>sha2</code>) and <code>check_duplicate_with_text</code>: two-phase — hash compare first → <code>similarity=1.0, is_duplicate=true</code> on match, else fall through to embedding cosine. Catches byte-identical duplicates that the embedding pipeline would otherwise cap at ~0.92 due to nomic prefix normalization. No schema migration required.</p>
+        <div class="stats"><span class="pass">commit 082c999 · db.rs surgical · 7 new tests pass</span></div>
+      </div>
+    </div>
+
+    <h3>Integrator stitches</h3>
+    <ul>
+      <li><strong>commit 63c46ab:</strong> wired γ's <code>compose_banner</code> + <code>ensure_keypair</code> into <code>daemon_runtime::serve()</code> after <code>bootstrap_serve</code>; routed <code>BannerLine::Info</code>/<code>Warn</code> into <code>tracing::info!</code>/<code>warn!</code>. Wired ε's <code>check_duplicate_with_text</code> into <code>mcp::handle_check_duplicate</code> and <code>handlers::check_duplicate</code> with the existing query-text variables threaded through. <code>[identity].disabled</code> config field intentionally left unwired — passes <code>false</code> for now; future config-shape PR opts out without churning this call site.</li>
+      <li><strong>commit 5d66626:</strong> <code>cargo fmt --all</code> sweep across the per-agent commits to satisfy CLAUDE.md gate #1.</li>
+      <li><strong>commit bd01978:</strong> updated the <code>test_cli_smoke_canonical_paths</code> integration smoke test to opt into <code>--confirm-global</code> for its global-pattern <code>forget</code> call (F11 semantics).</li>
+    </ul>
+
+    <h3>All four CLAUDE.md gates green on the merged branch</h3>
+    <pre><code>✓ cargo fmt --check
+✓ cargo clippy -p ai-memory --bin ai-memory --release -- -D warnings -D clippy::pedantic
+✓ AI_MEMORY_NO_CONFIG=1 cargo test --release --no-fail-fast
+   → 2 973 passed · 0 failed · 11 ignored · 81 test binaries / Doc-tests all green
+✓ cargo build --release
+   → target/release/ai-memory · 24.6 MB · loads cleanly</code></pre>
+
+    <h3>Round-3 verification gate (next session, fresh boot)</h3>
+    <p>The orchestrating Round-2 session ran against the broken (pre-fix) daemon, so live re-verification needs a fresh Claude Code session against the rebuilt binary:</p>
+    <ol>
+      <li>Pull <code>round-2-fixes</code> (or the merged branch). <code>cargo build --release</code> already produces <code>target/release/ai-memory</code>.</li>
+      <li>Re-point the brew symlink (<code>scripts/dogfood-rebuild.sh</code> handles this idempotently).</li>
+      <li>Exit the current Claude Code session — the running MCP daemon needs to terminate so the next process boot loads the new binary.</li>
+      <li>Start a fresh Claude Code session.</li>
+      <li>Re-run a Round-3 verification sweep against the fixed binary; expected: all 13 findings verify green.</li>
+    </ol>
+
+    <div class="links-row">
+      <a class="primary" href="https://github.com/alphaonedev/ai-memory-mcp/pull/643">PR #643 — fix campaign</a>
+      <a href="https://github.com/alphaonedev/ai-memory-mcp/issues/637">issue #637 — master tracker</a>
+      <a href="https://github.com/alphaonedev/ai-memory-mcp/issues/638">#638 (F6)</a>
+      <a href="https://github.com/alphaonedev/ai-memory-mcp/issues/639">#639 (F7/F9/F10)</a>
+      <a href="https://github.com/alphaonedev/ai-memory-mcp/issues/640">#640 (F8/F11/F12)</a>
+      <a href="https://github.com/alphaonedev/ai-memory-mcp/issues/641">#641 (F13/F14/F15/F16)</a>
+      <a href="https://github.com/alphaonedev/ai-memory-mcp/issues/642">#642 (F17/F18)</a>
     </div>
   </div>
 </section>
