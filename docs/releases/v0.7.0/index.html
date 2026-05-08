@@ -8,8 +8,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ai-memory · Test Hub · v0.7.0 NHI evidence (Round 1 + Round 2 + Round 3)</title>
-<meta name="description" content="v0.7.0 attested-cortex — Round-1 NHI verdict (SHIP-WITH-NOTES, 114/132 pass) + post-NHI fixes (PR #636) + Round-2 multi-agent regression sweep against the post-fix binary, which surfaced 3 new release-blockers (F6 LLM-dispatch deadlock, F7 HTTP quota bypass, F8 advisory-default permissions) + Round-3 verification on the freshly-rebuilt binary which confirmed F6/F7/F9/F10/F11/F18 GREEN and surfaced F8/F12 holes that landed in commit f02d092 (effective_permissions_mode wired to resolve_v07_default_mode + ensure_and_load_daemon_keypair before AppState build + memory_find_paths description). All 13 Round-2 findings now verify GREEN against the rebuilt binary; tag-gate is operator-side daemon restart + PR #643 review.">
+<title>ai-memory · Test Hub · v0.7.0 NHI evidence (Round 1 + Round 2 + Round 3 + Round 4)</title>
+<meta name="description" content="v0.7.0 attested-cortex — Round-1 NHI verdict (SHIP-WITH-NOTES, 114/132 pass) + post-NHI fixes (PR #636) + Round-2 multi-agent regression sweep (3 blockers F6/F7/F8) + Round-3 fresh-binary verification (commit f02d092 closes F8/F12/F17) + Round-4 live patched-daemon regression sweep (4 parallel sub-agents · TAG-READY-WITH-FOLLOW-UPS · zero F1–F18 regressions · 2 new yellow findings: F12 runtime adoption gap + smart_load routing regression). Tag-gate is operator-side review of PR #643/#636/#626 + decide whether to ship + open follow-up sub-issues.">
 <style>
 :root{--bg:#000;--bg-card:#111;--bg-elev:#161616;--bg-code:#1a1a1a;--border:#262626;--border-hl:#3d3d3d;--text:#fff;--text-muted:#999;--text-dim:#666;--p1:#6ee7ff;--p2:#ffb86b;--p3:#c8a2ff;--good:#6ee7ff;--bad:#ff6b9d;--gold:#ffd700;--font-mono:'SF Mono','Cascadia Code','Fira Code',Consolas,monospace;--font-sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;--max-w:1200px}
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -131,6 +131,7 @@ footer a{color:var(--text-muted)}
   <div class="inner">
     <a class="home-link" href="../../">ai-memory · Test Hub</a>
     <div class="right">
+      <a href="#round4" style="color:var(--good);font-weight:600">Round 4 · TAG-READY</a>
       <a href="#round3" style="color:var(--good);font-weight:600">Round 3 · GREEN</a>
       <a href="#fix-campaign" style="color:var(--good);font-weight:600">Fix campaign</a>
       <a href="#round2" style="color:var(--p2);font-weight:600">Round 2</a>
@@ -153,6 +154,7 @@ footer a{color:var(--text-muted)}
     <div class="verdict hold"><span class="label">Round 2</span>HOLD-TAG · F6/F7/F8</div>
     <div class="verdict ship"><span class="label">Round 2 fixes</span>13/13 · PR #643</div>
     <div class="verdict ship"><span class="label">Round 3 verify</span>GREEN · commit f02d092</div>
+    <div class="verdict ship"><span class="label">Round 4 sweep</span>TAG-READY · 2 follow-ups</div>
   </div>
   <p class="lede"><strong>Round 1</strong> ran the 12-phase NHI playbook (114 PASS / 6 partial / 12 config-gap / 0 fail; three P2 fixes shipped on PR #636). <strong>Round 2</strong> dispatched 5 parallel sub-agents against the post-fix binary and surfaced three blockers (F6 LLM-dispatch deadlock + silent recall degradation, F7 HTTP store path bypasses quota counters, F8 <code>permissions.mode=advisory</code> default disables write enforcement) plus 10 release-notes items (F9–F18). The <strong>Round-2 fix campaign</strong> dispatched 5 parallel fix-agents in worktree-isolated branches; nine commits later all 13 findings landed on PR #643. <strong>Round 3</strong> ran fresh-binary verification (3 parallel sub-agents + orchestrator-direct probes) and surfaced two residual holes the Round-2 commits missed — F8's <code>resolve_v07_default_mode</code> was wired only into the banner, not the gate; F12's keypair auto-gen used a different label than the load path, leaving <code>app.active_keypair = None</code>. <strong>Both holes plus the F17 description gap fixed in commit f02d092</strong> (round-2-fixes branch HEAD). Fresh-binary re-verification: <code>permissions.mode=enforce</code> by default, intruder write to <code>governance.write=owner</code> namespace returns <strong>HTTP 403</strong>, new links land with <strong>attest_level=self_signed + 64-byte signature</strong>, <code>memory_find_paths</code> description names the cap and undirected semantics. All four CLAUDE.md gates green on the new commit (2 973 tests / 0 fail). Tag-gate is now operator-side: review PR #643 + restart the live HTTP daemon (the running PID has the kernel-mapped pre-rebuild inode, not the patched binary).</p>
   <div class="metrics container">
@@ -195,6 +197,21 @@ footer a{color:var(--text-muted)}
       <div class="label">Round 3 — fresh binary</div>
       <div class="value good">f02d092</div>
       <div class="sub">F8 + F12 + F17 — gates green · 24 546 672 B</div>
+    </div>
+    <div class="metric">
+      <div class="label">Round 4 — live patched daemon</div>
+      <div class="value good">F1–F18 · 0 regressions</div>
+      <div class="sub">4 parallel sub-agents · 2 yellow follow-ups (F12 runtime · smart_load)</div>
+    </div>
+    <div class="metric">
+      <div class="label">Round 4 — perf vs R2</div>
+      <div class="value good">+4.8% throughput</div>
+      <div class="sub">35.53/s · p99 38.95 ms (mild +44% tail)</div>
+    </div>
+    <div class="metric">
+      <div class="label">Round 4 — enforce gate</div>
+      <div class="value good">2 → 1 550</div>
+      <div class="sub">decision counter delta proves gate is live</div>
     </div>
   </div>
 </section>
@@ -493,6 +510,80 @@ curl -s http://127.0.0.1:19077/api/v1/capabilities | jq '.permissions.mode'
       <a class="primary" href="https://github.com/alphaonedev/ai-memory-mcp/pull/643">PR #643 — Round-2 fix campaign + Round-3 follow-up</a>
       <a href="https://github.com/alphaonedev/ai-memory-mcp/commit/f02d092">commit f02d092 — Round-3 fixes</a>
       <a href="https://github.com/alphaonedev/ai-memory-mcp/pull/626">PR #626 — release/v0.7.0 (human-gated)</a>
+      <a href="#fix-campaign">↑ Round-2 fix campaign</a>
+      <a href="#round2">↑ Round 2 sweep</a>
+    </div>
+  </div>
+</section>
+
+<section id="round4">
+  <div class="container">
+    <span class="eyebrow">Round 4 · live patched-daemon regression sweep · TAG-READY w/ follow-ups</span>
+    <h2>Round 4 — 4 parallel sub-agents · Round-3 blockers all hold · 2 new yellow findings filed for v0.7.1.</h2>
+    <p class="lede">Round 4 ran in a fresh Claude Code CLI session against the <strong>live patched HTTP daemon</strong> (PID 43617, port 19077, kernel-mapped binary inode <code>22303195</code> = post-Round-3 commit <code>f02d092</code>). Pre-flight independently re-verified the three Round-3 fixes on the live process: <code>permissions.mode=enforce</code>, fresh links land at <code>attest_level=self_signed</code> with 64-byte signature, and <code>memory_find_paths</code> returns the cap-aware description. The orchestrator dispatched <strong>4 parallel sub-agents</strong> (A regression / B load / C security / D capabilities), each writing to its own sub-namespace under <code>ai-memory/v0.7.0-nhi-round-4</code>. Aggregate result: <strong>all Round-3 blockers (F8 enforce, F12 link signing structure, F17 description) hold; zero F1–F18 regressions; the permission gate exercised live (<code>enforce: 2 → 1550</code> decision counter delta); two new yellow findings worth follow-up sub-issues but not technical blockers.</strong></p>
+
+    <div class="note block"><strong>Verdict:</strong> TAG-READY-WITH-FOLLOW-UPS (yellow-green). Technical blockers from Round 3 are resolved on the live daemon. The two new yellow findings — <strong>F12 runtime adoption gap</strong> (signing structure works once but daemon was launched without <code>AI_MEMORY_AGENT_ID=daemon</code> so its synthesized per-PID NHI doesn't match the on-disk <code>daemon.priv/.pub</code> keypair; result: 0 / 128 in-DB links currently signed) and <strong>smart_load routing regression</strong> (4–5 / 10 vs Round 3's 8 / 10 — common verbs <code>store</code>/<code>recall</code>/<code>verify</code>/<code>consolidate</code>/<code>promote</code> collapse to <code>archive</code> via embedder fallback; the F8 fix <code>notify → other</code> is confirmed live) — are real but operator-decidable. Operator can ship + open follow-up sub-issues, or hold for one-line patches.</div>
+
+    <h3>Round 4 — sub-agent results</h3>
+    <div class="cards">
+      <div class="card">
+        <div class="head"><span class="id">Agent A</span><span class="sev closed">F1–F18 regression · 13 PASS / 4 PARTIAL / 0 FAIL</span></div>
+        <p>Re-ran the F1–F18 probe sequence against the live daemon. Zero regressions vs Round 3; one improvement (F14 routing better on the sampled subset). Decision-counter delta <code>enforce: 2 → 1550</code> proves the gate is live, not bypassed. Minor non-blocking observations: F7 <code>webhook_url</code> body field shape drift (SSRF guard still rejects loopback); F13 <code>verbose=true</code> / env / <code>--profile full</code> all NO-OP on tools/list (output byte-identical at 10766 B / 51 tools). Summary memory <code>53334972-53c2-40e9-a952-9633134df98e</code>.</p>
+      </div>
+      <div class="card">
+        <div class="head"><span class="id">Agent B</span><span class="sev closed">load + concurrency · throughput +4.8% vs R2</span></div>
+        <p>5 × 100 fan-out: 500 / 500 OK in 11.51 s (43.4 stores/s aggregate, 0 errors). Per-agent quota tracking exact (<code>current_memories_today=100</code> per agent_id). 10-way race on the same <code>(title, namespace)</code>: 1 × 201 + 9 × 409 CONFLICT, no SQLITE_BUSY / 5xx leakage, all losers got <code>existing_id</code>. 1 000 sequential stores: 35.53 stores/s, p50 17.46 ms, p95 30.02 ms, p99 38.95 ms (one 2.2 s embedder pause did not cascade) — vs R2 baseline 33.9/s p99 27 ms: throughput +4.8%, p99 +44% (mild tail regression, non-blocking). Webhook DLQ ladder not actively exercised (SSRF guard requires <code>[subscriptions] allow_loopback_webhooks=true</code> opt-in, intentionally not modified per hard rules); existing DLQ row shape + <code>memory_subscription_replay</code> shape captured.</p>
+      </div>
+      <div class="card">
+        <div class="head"><span class="id">Agent C</span><span class="sev p2">security + governance · F12 runtime gap surfaced</span></div>
+        <p>SSRF guards: 11 / 11 reject (loopback / link-local / RFC1918 / file:// / plaintext non-loopback) with sanitized errors, 3-layer defense observed. Permission policy schema discovered as <code>any | registered | owner</code> (the playbook's <code>none</code>/<code>team</code> rules don't exist in this build); <code>write=owner</code> enforcement PASS. Inheritance PASS for parent-with-<code>inherit=true</code> gating deep child. <strong>Identity rotation refusal PASS via <code>--no-overwrite</code></strong>; daemon key sha256 unchanged. <span class="sev p2">F12 runtime gap:</span> live DB shows 128 / 128 links <code>attest_level='unsigned'</code> with NULL signature; <code>signed_events</code> table empty. Daemon launched as <code>ai-memory serve --host 127.0.0.1 --port 19077 --db ...</code> without <code>AI_MEMORY_AGENT_ID=daemon</code>, so its synthesized NHI <code>host:FROSTYi.local:pid-43617-&lt;uuid8&gt;</code> doesn't match the only on-disk key (<code>daemon.priv</code>/<code>daemon.pub</code>). Pre-flight succeeded once, general traffic does not. Operator-actionable (relaunch with env var) AND code-actionable (signing path should fall back to the on-disk <code>daemon</code> key when the daemon has no explicit agent_id). Other minor: <code>identity generate</code> defaults are inverted (default = OVERWRITE, opt-out is <code>--no-overwrite</code>; no <code>--force</code> flag — UX foot-gun); macOS key dir is <code>~/Library/Application Support/ai-memory/keys/</code> (help text says <code>~/.config/ai-memory/keys</code>). Summary memory <code>50ee2c13-38b5-47fd-aecc-a33d1f4cf3ba</code>.</p>
+      </div>
+      <div class="card">
+        <div class="head"><span class="id">Agent D</span><span class="sev p2">capabilities + tokens · smart_load regression</span></div>
+        <p><code>doctor --tokens --json</code>: <strong>trimmed_full = 2 283 tokens</strong> (cap ≤ 3 500, 35% headroom), savings 74.5%, per-tool max ≈ 264 tokens. <code>memory_capabilities</code> 13-shape matrix: 4 / 4 invariants GREEN — v1 includes <code>schema_version=1</code>, verbose grows payload 11498 → 25923 B (2.25×), include_schema adds per-tool <code>inputSchema</code> (272 → 3676 B = 13.5×), all 8 family drills return <code>tools[]</code>. <code>memory_load_family</code> for all 8 families: PASS (51 tools total, matches doctor). <span class="sev p2">smart_load regression:</span> 4–5 / 10 routing accuracy vs Round 3's 8 / 10 — the F8 fix <code>notify → other</code> is confirmed live, but common verbs <code>store</code>/<code>recall</code>/<code>verify</code>/<code>consolidate</code>/<code>promote</code> collapse to <code>archive</code> via embedder fallback (all routes report <code>source=embedder</code>; keyword-rule taxonomy table appears not to be firing). Non-blocking but real UX regression. Summary memory <code>53013be5-ee06-4ed7-98b2-59813a6f67ba</code>.</p>
+      </div>
+    </div>
+
+    <h3>Round 4 — what's still GREEN (Round-3 blockers, re-verified live)</h3>
+    <ul>
+      <li><strong>F8 enforce mode live:</strong> <code>permissions.mode=enforce</code>; 1 550 enforce decisions counted across the suite.</li>
+      <li><strong>F12 link signing path:</strong> pre-flight created link returned <code>attest_level=self_signed</code>, 64-byte signature in DB.</li>
+      <li><strong>F17 <code>memory_find_paths</code> description:</strong> matches expected text exactly.</li>
+      <li><strong>8 / 8 families load</strong> (core / lifecycle / graph / governance / power / meta / archive / other = 51 tools).</li>
+      <li><strong>Token budget:</strong> 2 283 / 3 500 trimmed (35% headroom).</li>
+      <li><strong>1 000-store sequential:</strong> 0 errors, p99 &lt; 40 ms.</li>
+      <li><strong>10-way race:</strong> clean 1 × 201 + 9 × 409 CONFLICT, no 5xx leakage.</li>
+      <li><strong>Per-agent quota tracking:</strong> exact (<code>current_memories_today</code> per agent_id).</li>
+      <li><strong>SSRF defense:</strong> 11 / 11 reject, 3-layer.</li>
+      <li><strong>Identity overwrite refused</strong> via <code>--no-overwrite</code>; daemon key sha256 unchanged.</li>
+    </ul>
+
+    <h3>Round 4 — new yellow findings (not blocking; file as v0.7.1 sub-issues)</h3>
+    <ol>
+      <li><strong>F12 runtime adoption gap.</strong> Daemon process identity doesn't match on-disk <code>daemon</code> key, so general HTTP traffic produces unsigned links. Operator-actionable (relaunch with <code>AI_MEMORY_AGENT_ID=daemon</code>); code-actionable (signing path should fall back to the on-disk <code>daemon</code> key when the daemon has no explicit agent_id).</li>
+      <li><strong>smart_load routing regression.</strong> 4–5 / 10 vs Round 3's 8 / 10. Embedder fallback misroutes common verbs to <code>archive</code>; keyword-rule taxonomy table appears not to be firing.</li>
+      <li><strong><code>identity generate</code> inverted defaults</strong> (UX foot-gun). Default action is OVERWRITE, opt-out is <code>--no-overwrite</code>; no <code>--force</code> flag. A typo can silently rotate the daemon key.</li>
+      <li><strong>F13 verbose-tools toggle NO-OP</strong> on tools/list (10 766 B regardless of <code>verbose=true</code> / env / <code>--profile</code>).</li>
+      <li><strong>macOS key-dir help-text mismatch</strong> (<code>~/.config/ai-memory/keys</code> vs actual <code>~/Library/Application Support/ai-memory/keys</code>).</li>
+      <li><strong>Sequential-store p99 +44% vs R2</strong> (38.95 ms vs 27 ms). No errors, no cascade — mild regression noted.</li>
+    </ol>
+
+    <h3>Round 4 — hard-rule compliance</h3>
+    <ul>
+      <li>No code modified. No PRs merged. No tags cut. No publish actions.</li>
+      <li>All sub-agent writes constrained to <code>ai-memory/v0.7.0-nhi-round-4/&lt;agent&gt;</code> sub-namespaces.</li>
+      <li>Live daemon untouched (still PID 43617).</li>
+      <li>Scratch namespaces forgotten by each sub-agent at end.</li>
+    </ul>
+
+    <h3>Recall the Round-4 verdict</h3>
+    <pre><code>memory_recall context="v0.7.0 Round-4 verdict" namespace="ai-memory/v0.7.0-nhi-round-4"</code></pre>
+
+    <div class="links-row">
+      <a class="primary" href="https://github.com/alphaonedev/ai-memory-mcp/pull/643">PR #643 — Round-2 fix campaign + Round-3/4 follow-up</a>
+      <a href="https://github.com/alphaonedev/ai-memory-mcp/issues/637">Master tracking issue #637</a>
+      <a href="https://github.com/alphaonedev/ai-memory-mcp/pull/626">PR #626 — release/v0.7.0 (human-gated)</a>
+      <a href="#round3">↑ Round 3 verification</a>
       <a href="#fix-campaign">↑ Round-2 fix campaign</a>
       <a href="#round2">↑ Round 2 sweep</a>
     </div>
