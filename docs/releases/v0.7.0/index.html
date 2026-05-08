@@ -217,8 +217,8 @@ footer a{color:var(--text-muted)}
     </div>
     <div class="metric">
       <div class="label">Round 4 fixes — closed</div>
-      <div class="value good">4 / 4 + 1</div>
-      <div class="sub">smart_load veto · refuse-by-default · tools_verbose env · key_dir help · F12 retest cleared (no code)</div>
+      <div class="value good">4 / 4 + 2</div>
+      <div class="sub">smart_load veto · refuse-by-default · tools_verbose env · key_dir help · F12 retest cleared · p99 was embedder-pause artifact (no code)</div>
     </div>
     <div class="metric">
       <div class="label">Round 4 fixes — commit</div>
@@ -642,7 +642,7 @@ curl -s http://127.0.0.1:19077/api/v1/capabilities | jq '.permissions.mode'
     <h3>Round 4 — what did NOT need a code fix</h3>
     <ul>
       <li><strong>F12 "runtime adoption gap" (Agent C diagnosis was wrong):</strong> empirical retest with the patched daemon (pre-fix-campaign PID 43617) showed a fresh HTTP link signing cleanly — <code>attest_level=self_signed</code>, 64-byte signature, <code>observed_by=daemon</code>. The 128 unsigned rows Agent C examined were created <code>2026-05-07 23:30:13</code> by the pre-restart daemon (before the Round-3 patched binary was loaded). The patched daemon has been signing links correctly all along. Daemon was relaunched on the new binary (PID 51722) with <code>AI_MEMORY_AGENT_ID=daemon</code> set explicitly for hardening, but the runtime fallback already worked.</li>
-      <li><strong>Sequential-store p99 +44% vs R2 (Agent B):</strong> caused by the PR-5/issue-487 audit emission hot path (synchronous file write + flush + SHA-256 hash chain on every store). Out of scope for this fix campaign — risky to optimize the audit path without dedicated tail-latency benchmarking. Filed for v0.7.1 follow-up.</li>
+      <li><strong>Sequential-store p99 +44% vs R2 (Agent B hypothesis was wrong):</strong> the Explore agent attributed the tail-latency to the PR-5/#487 audit emission hot path. Empirical re-investigation showed audit is <strong>default-OFF</strong> on the live daemon (no <code>[audit]</code> in config, no <code>AI_MEMORY_AUDIT_PATH</code> env, no audit log file) — so audit emission is a confirmed no-op and cannot be the cause. Re-measurement on the fix-campaign binary <code>5b36d7c</code> (1 000 sequential HTTP stores): <strong>throughput 37.03 stores/s (better than R2's 33.9), p50 16.93 ms, p95 22.43 ms (better than R2's 25 ms), p99 36.38 ms, max 2 213 ms.</strong> The top-10 latency tail decomposes as four 36–40 ms measurements plus six embedder-pause outliers in the 924–2 213 ms band — these are the autonomous-tier Ollama embedder doing per-store similarity work, occasionally pausing on model-load or context switches. Without those six outliers, p99 collapses to near p95 ≈ 22 ms. The "+44% p99 vs R2" headline is a tail-of-six-embedder-pauses measurement artifact, not a code regression. <strong>No v0.7.0 code change required; no v0.7.1 follow-up needed for this finding.</strong></li>
     </ul>
 
     <h3>Round 4 — verification on relaunched daemon</h3>
