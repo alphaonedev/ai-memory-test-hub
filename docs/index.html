@@ -148,6 +148,12 @@ footer a{color:var(--text-muted)}
     <p class="lede">Each release gets one evidence page with the gate-by-gate results and the verdict. The current in-flight release is at the top. The pattern going forward is one <code>ai-memory-a2a-v&lt;version&gt;</code> repo per release; the umbrella <code>ai-memory-ai2ai-gate</code> stays the spec.</p>
     <div class="releases">
       <div class="rel" style="border-color:var(--p1);box-shadow:0 0 0 1px rgba(110,231,255,0.18)">
+        <div class="ver">v0.7.0-a2a</div>
+        <span class="status testing" style="color:var(--p1);background:rgba(110,231,255,0.12)">▶ a2a campaign in flight · 76 scenarios · 2-round 100% GREEN gate</span>
+        <p>Three-node A2A regression + net-new for v0.7.0: <strong>openclaw ↔ hermes ↔ postgres+AGE</strong> on a private DigitalOcean VPC, both agent personas driven by <strong>Grok 4.2 reasoning</strong> (<code>grok-4.20-0309-reasoning</code>). 76 scenarios consolidate the full prior universe (S1–S51 from ai2ai-gate v0.6.x baselines, ship-gate Phase 1–4, NHI Round 1–4) plus 25 net-new scenarios for v0.7.0-only surfaces (cross-agent attest_level signing, F8 enforce gate cross-agent, smart_load keyword veto, AI_MEMORY_TOOLS_VERBOSE env, audit chain A2A, memory_notify cross-droplet, subscription webhook A2A, postgres+AGE migration + Cypher equivalence, Grok-driven dialog loop, reasoning-trace persistence). New gate standard: <strong>two consecutive rounds at 100% GREEN before tag-cut</strong>. Subject under test: ai-memory v0.7.0 commit <code>dfb184f</code> on <code>round-2-fixes</code>.</p>
+        <a href="https://alphaonedev.github.io/ai-memory-a2a-v0.7.0/" style="color:var(--p1)">live results →</a>
+      </div>
+      <div class="rel" style="border-color:var(--p1);box-shadow:0 0 0 1px rgba(110,231,255,0.18)">
         <div class="ver">v0.7.0</div>
         <span class="status testing" style="color:var(--p1);background:rgba(110,231,255,0.12)">▶ NHI tested · ship-with-notes</span>
         <p>"Attested-cortex" release — 69/69 epic tasks across 11 tracks (A–K) plus 15 audit-blocker fixes from issue #628. Full-spectrum NHI test (Non-Human Identity) ran the 12-phase playbook against the released v0.7.0 binary on a live MCP database. Result: <strong>114 PASS / 0 FAIL</strong>, 3 P2 fixes shipped on PR #636 against <code>release/v0.7.0</code>, F1 + F5 closed as test-bugs (wrong header name).</p>
