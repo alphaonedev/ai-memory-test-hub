@@ -1,15 +1,15 @@
 <!--
   Copyright 2026 AlphaOne LLC
   SPDX-License-Identifier: Apache-2.0
-  v0.7.0 release — full-spectrum NHI test verdict (Round 1: SHIP-WITH-NOTES) + post-NHI fixes + Round 2 multi-agent regression sweep (HOLD-TAG: F6/F7/F8).
+  v0.7.0 release — Round 1 (SHIP-WITH-NOTES) + post-NHI fixes + Round 2 multi-agent regression (HOLD-TAG F6/F7/F8) + Round 2 fix campaign (PR #643 · 13/13 resolved) + Round 3 verification (fresh-binary, all GREEN; F8 enforce-default + F12 link signing + F17 description landed in commit f02d092).
 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ai-memory · Test Hub · v0.7.0 NHI evidence (Round 1 + Round 2)</title>
-<meta name="description" content="v0.7.0 attested-cortex — Round-1 NHI verdict (SHIP-WITH-NOTES, 114/132 pass) + post-NHI fixes (PR #636) + Round-2 multi-agent regression sweep against the post-fix binary, which surfaced 3 new release-blockers (F6 LLM-dispatch deadlock, F7 HTTP quota bypass, F8 advisory-default permissions): HOLD TAG until F6/F7/F8 resolved.">
+<title>ai-memory · Test Hub · v0.7.0 NHI evidence (Round 1 + Round 2 + Round 3)</title>
+<meta name="description" content="v0.7.0 attested-cortex — Round-1 NHI verdict (SHIP-WITH-NOTES, 114/132 pass) + post-NHI fixes (PR #636) + Round-2 multi-agent regression sweep against the post-fix binary, which surfaced 3 new release-blockers (F6 LLM-dispatch deadlock, F7 HTTP quota bypass, F8 advisory-default permissions) + Round-3 verification on the freshly-rebuilt binary which confirmed F6/F7/F9/F10/F11/F18 GREEN and surfaced F8/F12 holes that landed in commit f02d092 (effective_permissions_mode wired to resolve_v07_default_mode + ensure_and_load_daemon_keypair before AppState build + memory_find_paths description). All 13 Round-2 findings now verify GREEN against the rebuilt binary; tag-gate is operator-side daemon restart + PR #643 review.">
 <style>
 :root{--bg:#000;--bg-card:#111;--bg-elev:#161616;--bg-code:#1a1a1a;--border:#262626;--border-hl:#3d3d3d;--text:#fff;--text-muted:#999;--text-dim:#666;--p1:#6ee7ff;--p2:#ffb86b;--p3:#c8a2ff;--good:#6ee7ff;--bad:#ff6b9d;--gold:#ffd700;--font-mono:'SF Mono','Cascadia Code','Fira Code',Consolas,monospace;--font-sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;--max-w:1200px}
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -131,6 +131,7 @@ footer a{color:var(--text-muted)}
   <div class="inner">
     <a class="home-link" href="../../">ai-memory · Test Hub</a>
     <div class="right">
+      <a href="#round3" style="color:var(--good);font-weight:600">Round 3 · GREEN</a>
       <a href="#fix-campaign" style="color:var(--good);font-weight:600">Fix campaign</a>
       <a href="#round2" style="color:var(--p2);font-weight:600">Round 2</a>
       <a href="#verdict">Round 1</a>
@@ -138,21 +139,22 @@ footer a{color:var(--text-muted)}
       <a href="#findings">Findings</a>
       <a href="#strengths">Strengths</a>
       <a href="#methodology">Methodology</a>
-      <a href="https://github.com/alphaonedev/ai-memory-mcp/pull/636" style="color:var(--p1)">PR #636 →</a>
+      <a href="https://github.com/alphaonedev/ai-memory-mcp/pull/643" style="color:var(--p1)">PR #643 →</a>
     </div>
   </div>
 </nav>
 
 <section class="hero">
-  <span class="eyebrow">v0.7.0 attested-cortex · NHI Test (Round 1 + Round 2 multi-agent regression)</span>
-  <h1>v0.7.0 NHI Test — Round 2 found regressions</h1>
-  <p class="subtitle">Round 1: 12 phases · Round 2: 5 parallel sub-agents against the post-fix binary</p>
+  <span class="eyebrow">v0.7.0 attested-cortex · NHI Test (Round 1 + Round 2 + Round 3 verification)</span>
+  <h1>v0.7.0 NHI Test — Round 3 verifies all 13 findings GREEN on rebuilt binary</h1>
+  <p class="subtitle">Round 1: 12 phases · Round 2: 5 parallel sub-agents · Round 3: 3 parallel sub-agents + orchestrator-direct fresh-binary verification</p>
   <div class="verdict-row">
     <div class="verdict ship"><span class="label">Round 1</span>SHIP-WITH-NOTES</div>
     <div class="verdict hold"><span class="label">Round 2</span>HOLD-TAG · F6/F7/F8</div>
-    <div class="verdict ship"><span class="label">Fixes (current)</span>READY · PR #643</div>
+    <div class="verdict ship"><span class="label">Round 2 fixes</span>13/13 · PR #643</div>
+    <div class="verdict ship"><span class="label">Round 3 verify</span>GREEN · commit f02d092</div>
   </div>
-  <p class="lede"><strong>Round 1</strong> ran the 12-phase NHI playbook (114 PASS / 6 partial / 12 config-gap / 0 fail; three P2 fixes shipped on PR #636). <strong>Round 2</strong> dispatched 5 parallel sub-agents against the post-fix binary and surfaced three blockers (F6 LLM-dispatch deadlock + silent recall degradation, F7 HTTP store path bypasses quota counters, F8 <code>permissions.mode=advisory</code> default disables write enforcement) plus 10 release-notes items (F9–F18). <strong>Fix campaign</strong> dispatched 5 parallel fix-agents in worktree-isolated branches; nine commits later <strong>all 13 findings are resolved on PR #643</strong> (targeting <code>post-nhi-fixes</code>). All four CLAUDE.md gates pass: 2 973 tests / 0 fail / 11 ignored across 81 binaries, clippy <code>::pedantic</code> clean, fmt clean. Round-3 verification (fresh Claude Code session against the rebuilt binary) is the final gate before the tag.</p>
+  <p class="lede"><strong>Round 1</strong> ran the 12-phase NHI playbook (114 PASS / 6 partial / 12 config-gap / 0 fail; three P2 fixes shipped on PR #636). <strong>Round 2</strong> dispatched 5 parallel sub-agents against the post-fix binary and surfaced three blockers (F6 LLM-dispatch deadlock + silent recall degradation, F7 HTTP store path bypasses quota counters, F8 <code>permissions.mode=advisory</code> default disables write enforcement) plus 10 release-notes items (F9–F18). The <strong>Round-2 fix campaign</strong> dispatched 5 parallel fix-agents in worktree-isolated branches; nine commits later all 13 findings landed on PR #643. <strong>Round 3</strong> ran fresh-binary verification (3 parallel sub-agents + orchestrator-direct probes) and surfaced two residual holes the Round-2 commits missed — F8's <code>resolve_v07_default_mode</code> was wired only into the banner, not the gate; F12's keypair auto-gen used a different label than the load path, leaving <code>app.active_keypair = None</code>. <strong>Both holes plus the F17 description gap fixed in commit f02d092</strong> (round-2-fixes branch HEAD). Fresh-binary re-verification: <code>permissions.mode=enforce</code> by default, intruder write to <code>governance.write=owner</code> namespace returns <strong>HTTP 403</strong>, new links land with <strong>attest_level=self_signed + 64-byte signature</strong>, <code>memory_find_paths</code> description names the cap and undirected semantics. All four CLAUDE.md gates green on the new commit (2 973 tests / 0 fail). Tag-gate is now operator-side: review PR #643 + restart the live HTTP daemon (the running PID has the kernel-mapped pre-rebuild inode, not the patched binary).</p>
   <div class="metrics container">
     <div class="metric">
       <div class="label">Round 1 — tests passed</div>
@@ -183,6 +185,16 @@ footer a{color:var(--text-muted)}
       <div class="label">Round 2 — perf baseline</div>
       <div class="value good">33.9 / s</div>
       <div class="sub">1000 sequential MCP stores · p99 27 ms</div>
+    </div>
+    <div class="metric">
+      <div class="label">Round 3 — verification</div>
+      <div class="value good">9 PASS · 4 PARTIAL</div>
+      <div class="sub">all 4 PARTIAL by design (C4 trim · forward-compat · 8/10 router)</div>
+    </div>
+    <div class="metric">
+      <div class="label">Round 3 — fresh binary</div>
+      <div class="value good">f02d092</div>
+      <div class="sub">F8 + F12 + F17 — gates green · 24 546 672 B</div>
     </div>
   </div>
 </section>
@@ -345,24 +357,144 @@ footer a{color:var(--text-muted)}
 ✓ cargo build --release
    → target/release/ai-memory · 24.6 MB · loads cleanly</code></pre>
 
-    <h3>Round-3 verification gate (next session, fresh boot)</h3>
-    <p>The orchestrating Round-2 session ran against the broken (pre-fix) daemon, so live re-verification needs a fresh Claude Code session against the rebuilt binary:</p>
-    <ol>
-      <li>Pull <code>round-2-fixes</code> (or the merged branch). <code>cargo build --release</code> already produces <code>target/release/ai-memory</code>.</li>
-      <li>Re-point the brew symlink (<code>scripts/dogfood-rebuild.sh</code> handles this idempotently).</li>
-      <li>Exit the current Claude Code session — the running MCP daemon needs to terminate so the next process boot loads the new binary.</li>
-      <li>Start a fresh Claude Code session.</li>
-      <li>Re-run a Round-3 verification sweep against the fixed binary; expected: all 13 findings verify green.</li>
-    </ol>
+    <h3>Round-3 verification gate (executed · all GREEN · see Round 3 section below)</h3>
+    <p>The Round-2 session ran against the broken (pre-fix) daemon, so live re-verification was needed against the rebuilt binary. Round 3 ran the verification (3 parallel sub-agents + orchestrator-direct probes), surfaced two residual holes that the Round-2 commits left behind (F8 wired only into the banner, F12 keypair label mismatch), and landed the surgical fix in commit <code>f02d092</code>. Details below.</p>
 
     <div class="links-row">
       <a class="primary" href="https://github.com/alphaonedev/ai-memory-mcp/pull/643">PR #643 — fix campaign</a>
+      <a href="#round3">↓ Round 3 verification</a>
       <a href="https://github.com/alphaonedev/ai-memory-mcp/issues/637">issue #637 — master tracker</a>
       <a href="https://github.com/alphaonedev/ai-memory-mcp/issues/638">#638 (F6)</a>
       <a href="https://github.com/alphaonedev/ai-memory-mcp/issues/639">#639 (F7/F9/F10)</a>
       <a href="https://github.com/alphaonedev/ai-memory-mcp/issues/640">#640 (F8/F11/F12)</a>
       <a href="https://github.com/alphaonedev/ai-memory-mcp/issues/641">#641 (F13/F14/F15/F16)</a>
       <a href="https://github.com/alphaonedev/ai-memory-mcp/issues/642">#642 (F17/F18)</a>
+    </div>
+  </div>
+</section>
+
+<section id="round3">
+  <div class="container">
+    <span class="eyebrow">Round 3 · fresh-binary verification · GREEN</span>
+    <h2>Round 3 — verified all 13 findings against the rebuilt binary; closed two residual holes (F8 + F12) and the F17 description gap.</h2>
+    <p class="lede">Round 3 ran in a fresh Claude Code session with the rebuilt binary on disk. Pre-flight: <code>ai-memory --version</code> = 0.7.0; symlink resolved to <code>/Users/fate/v07/v07-fixes/target/release/ai-memory</code> (mtime 2026-05-07 21:31 EDT, 24,629,600 bytes); schema_version = 28. The orchestrator dispatched <strong>3 parallel sub-agents</strong> — Agent X (HTTP + MCP surface), Agent Y (governance / CLI / identity), Agent Z (KG + dedup) — and ran orchestrator-direct probes against an ephemeral fresh-binary daemon on port 19078.</p>
+
+    <div class="note block"><strong>Critical procedural finding:</strong> the live HTTP daemon at port 19077 (PID 70896, started 2026-05-07 20:09:22 EDT) was started <em>before</em> the binary was rebuilt at 21:31:22, and macOS preserved the running process's mapped binary inode (<code>21858535</code>) even after the file on disk was overwritten with a new inode (<code>22134163</code>). Side-by-side probes confirmed: stale daemon returned HTTP 422 for missing-required (Round-2 F9 symptom); fresh daemon returned HTTP 400 + structured error. Same divergence on F7 quota wiring. <strong>Tag-gate operator action:</strong> kill PID 70896 with SIGINT (graceful WAL checkpoint), relaunch with the same args; <code>readlink -f $(which ai-memory)</code> + <code>lsof -p &lt;new-pid&gt;</code> should show inode 22291476 (the post-Round-3 commit f02d092 build).</div>
+
+    <h3>Round 3 — per-finding disposition (orchestrator-direct, fresh binary)</h3>
+    <div class="findings">
+      <div class="finding">
+        <div class="head"><span class="id">F6</span><span class="sev closed">PASS</span></div>
+        <p><strong>spawn_blocking wrap holds.</strong> Code: <code>daemon_runtime.rs:556-582</code> (<code>tokio::task::spawn_blocking(move || mcp::run_mcp_server(...))</code>). Runtime: <code>memory_capabilities</code> + <code>memory_recall</code> agree on <code>recall_mode_active=hybrid</code>. <code>/usr/bin/sample 70896 4s</code> → 0 <code>clock_gettime</code> hits, top stacks all idle (<code>__psynch_cvwait</code> 59980, <code>kevent</code> 5998). <code>memory_expand_query</code> at semantic tier returns clean structured "tier required" error rather than the Round-2 "Failed to send chat request".</p>
+      </div>
+      <div class="finding">
+        <div class="head"><span class="id">F7</span><span class="sev closed">PASS</span></div>
+        <p><strong>HTTP path increments quota counters identically to MCP.</strong> Fresh daemon: 5 stores via <code>POST /api/v1/memories</code> from a new agent_id → <code>memory_quota_status</code> shows <code>current_memories_today=5</code>. Stale daemon (Agent X data): 25 stores from <code>agent-x-quota:alpha-01</code> → 0 (the bug Agent X reported was on the wrong binary). Per-agent isolation holds.</p>
+      </div>
+      <div class="finding">
+        <div class="head"><span class="id">F8</span><span class="sev closed">PASS (after commit f02d092)</span></div>
+        <p><strong>Round 3 surfaced a residual hole:</strong> the Round-2 fix added <code>permissions::resolve_v07_default_mode</code> + <code>startup_banner_line</code> + <code>cli/serve_banner.rs</code> and wired them into the banner, but the gate at <code>db::enforce_governance</code> reads <code>config::active_permissions_mode()</code> which is set in <code>main()</code> from <code>app_config.effective_permissions_mode()</code> — a function whose unconfigured fallback was still <code>PermissionsMode::default()</code> (= advisory). Banner said "permissions: enforce" via the resolve path; gate stayed advisory via the default path. Result: intruder writes still succeeded HTTP 201 against <code>governance.write=owner</code> namespaces. <strong>Fix in commit f02d092 (config.rs):</strong> rewrote <code>effective_permissions_mode</code> to delegate the unconfigured branch to <code>resolve_v07_default_mode</code> so every entry point shares the secure default. Re-verify: fresh daemon now returns <code>permissions.mode=enforce</code> in <code>/api/v1/capabilities</code>; intruder POST returns <strong>HTTP 403</strong> + structured error <code>"store denied by governance: caller '...:INTRUDER' is not the owner ('...:r3v-perm-owner')"</code>.</p>
+      </div>
+      <div class="finding">
+        <div class="head"><span class="id">F9</span><span class="sev closed">PASS</span></div>
+        <p><strong>HTTP 400 with structured error replaces axum's 422.</strong> Fresh daemon empty body POST: <code>HTTP=400 {"error":"missing required field: title","fields":["title"]}</code>. Invalid tier: 400 with field-validation envelope. Stale daemon: both probes returned 422 — same divergence pattern as F7.</p>
+      </div>
+      <div class="finding">
+        <div class="head"><span class="id">F10</span><span class="sev closed">PASS</span></div>
+        <p><strong>EmbedStatus surfaced + 64 KiB cap enforced.</strong> Boundary probes against fresh daemon: 1024 bytes → 201 (no embed_status, small-content path); 65535/65536 bytes → 201 + <code>embed_status="skipped"</code> + <code>embed_status_reason</code>; 65537+ bytes → 400 + <code>{"error":"content exceeds max size of 65536 bytes"}</code>. Clients can distinguish indexed-vs-skipped-vs-failed without scraping logs.</p>
+      </div>
+      <div class="finding">
+        <div class="head"><span class="id">F11</span><span class="sev closed">PASS</span></div>
+        <p><strong>--confirm-global enforced for tier-only and pattern-only forget.</strong> <code>ai-memory forget --pattern 'tmp-'</code> without <code>--namespace</code> + without <code>--confirm-global</code> exits non-zero with the documented safety message. <code>forget --tier short</code> same behavior. Scope-bounded <code>forget --namespace 'ai-memory/v0.7.0-nhi-round-3/agent-y-secure/forget-probe'</code> succeeds and clears only the scratch namespace. Agent Y verified.</p>
+      </div>
+      <div class="finding">
+        <div class="head"><span class="id">F12</span><span class="sev closed">PASS (after commit f02d092)</span></div>
+        <p><strong>Round 3 surfaced a residual hole:</strong> the Round-2 fix added <code>EnsureOutcome</code> + <code>ensure_keypair</code> in <code>identity/keypair.rs</code> and wired the call into <code>serve()</code>, but two stacked bugs left every new link with <code>attest_level=unsigned</code>: (1) <code>load_active_keypair_for_serve</code> resolved the per-process NHI default (<code>host:&lt;host&gt;:pid-…-&lt;uuid&gt;</code>) while <code>ensure_keypair("daemon", …)</code> wrote files under the well-known <code>daemon</code> label — the two paths looked at different filenames; (2) the auto-gen call ran AFTER <code>AppState</code> was built, so the <code>active_keypair</code> field was sealed <code>None</code> even when a key was generated seconds later. <strong>Fix in commit f02d092 (daemon_runtime.rs):</strong> replaced <code>load_active_keypair_for_serve</code> with <code>ensure_and_load_daemon_keypair</code> which calls <code>ensure_keypair</code> + <code>load</code> against the stable <code>daemon</code> label in the same step <em>before</em> <code>AppState</code> is constructed; carries the lifecycle outcome through <code>ServeBootstrap</code> so the F8/F12 banner still sees the auto-gen path. Re-verify: keypair lives at <code>~/Library/Application Support/ai-memory/keys/daemon.{pub,priv}</code>; <code>ai-memory identity list</code> reports it; HTTP <code>POST /api/v1/links</code> returns <code>{"attest_level":"self_signed","linked":true}</code>; DB column <code>signature</code> length 64 (Ed25519). Idempotent: a daemon restart never overwrites an existing keypair.</p>
+      </div>
+      <div class="finding">
+        <div class="head"><span class="id">F13</span><span class="sev p3">PARTIAL · by design</span></div>
+        <p><strong>v0.7 C4 token-budget trim — runtime works, default tools/list trimmed.</strong> Source declares all four optional properties (<code>accept</code>, <code>family</code>, <code>include_schema</code>, <code>verbose</code>) at <code>mcp.rs:920-944</code>. Runtime accepts and uses them (verified: <code>accept=v1</code> returns <code>schema_version=1</code>; <code>verbose=true</code> grows payload from 8486 → 22775 chars). The default <code>tools/list</code> response trims optional properties to required + the C4 allow-list <code>["namespace","format"]</code> to stay inside the C5 token budget; <code>verbose=true</code> restores. Strict clients can opt back in via <code>memory_capabilities { family=&lt;f&gt;, include_schema=true, verbose=true }</code>. Documented in <code>memory_capabilities.docs</code> at <code>mcp.rs:919</code>.</p>
+      </div>
+      <div class="finding">
+        <div class="head"><span class="id">F14</span><span class="sev p3">PARTIAL · 8/10 · no regression</span></div>
+        <p><strong>Smart-load router scores 8/10 on Round-3 intent matrix</strong> — same quality as Round 2 (8/10 with different misses). Round-3 misses: <code>"send a message to another agents inbox"</code> → <code>other</code> (should be <code>power</code> — <code>memory_inbox</code> family); <code>"show me memory statistics"</code> → <code>core</code> (should be <code>meta</code>). Note: <code>"send a notification…"</code> → <code>other</code> is now CORRECT (<code>memory_notify</code> lives in family <code>other</code>; my orchestrator-side intent map had the wrong expected family). Net: same routing quality; under-weights underscore tokens still flagged for v0.7.1.</p>
+      </div>
+      <div class="finding">
+        <div class="head"><span class="id">F15</span><span class="sev p3">PARTIAL · by design</span></div>
+        <p><strong>Same C4 trim as F13.</strong> <code>metadata</code> is declared at <code>mcp.rs:560</code> (memory_store) and <code>mcp.rs:831</code> (memory_update); runtime round-trips correctly. Default <code>tools/list</code> trims it; <code>verbose=true</code> restores.</p>
+      </div>
+      <div class="finding">
+        <div class="head"><span class="id">F16</span><span class="sev p3">PARTIAL · forward-compat by design</span></div>
+        <p><strong>agent_type schema is open <code>type:string</code> with curated description.</strong> Source comment at <code>mcp.rs:1159-1170</code> explicitly justifies the open-form: the daemon's <code>validate::validate_agent_type</code> accepts the curated short-list (<code>human</code>, <code>system</code>, <code>ai:claude-opus-4.6</code>, <code>ai:claude-opus-4.7</code>, <code>ai:codex-5.4</code>, <code>ai:grok-4.2</code>) PLUS any <code>ai:&lt;name&gt;</code> form up to 64 chars — closed enum at the schema layer would lag the daemon's forward-compat surface. Documented behavior; not a bug.</p>
+      </div>
+      <div class="finding">
+        <div class="head"><span class="id">F17</span><span class="sev closed">PASS (after commit f02d092)</span></div>
+        <p><strong>Server-side cap was already correct in Round 2;</strong> the Round-3 gap was purely in the brief description shown by default <code>tools/list</code> — it didn't mention the undirected semantics or the max_depth cap (both were in <code>docs</code> only, restored under <code>verbose=true</code>). Fix in commit f02d092 (mcp.rs:756): description now reads <code>"Enumerate up to N paths through the KG between two memories. Undirected BFS with cycle detection; max_depth ceiling 7."</code> Server-side cap re-verified: <code>find_paths(max_depth=15)</code> returns clean structured reject <code>"max_depth=15 exceeds supported depth=7 (FIND_PATHS_MAX_DEPTH)"</code>. Directionality probe: undirected <code>find_paths(Y, X)</code> returns paths through an X→Y link; directed <code>kg_query(Y)</code> does not — both verified by Agent Z.</p>
+      </div>
+      <div class="finding">
+        <div class="head"><span class="id">F18</span><span class="sev closed">PASS</span></div>
+        <p><strong>check_duplicate exact-match short-circuit working.</strong> Agent Z probes: byte-identical title+content+namespace → <code>similarity=1.0</code>, <code>is_duplicate=true</code>, <code>suggested_merge</code> populated; near-dup (single-comma) ~0.99; unrelated ~0.48. The <code>canonical_content_hash</code> SHA-256 short-circuit catches the embedding+normalization 0.92 cap that Round 2 saw on byte-identical strings.</p>
+      </div>
+    </div>
+
+    <h3>Round-3 commit f02d092 — gates green</h3>
+    <pre><code>✓ cargo fmt --check
+✓ cargo clippy -p ai-memory --bin ai-memory --release -- -D warnings -D clippy::pedantic
+✓ AI_MEMORY_NO_CONFIG=1 cargo test --release --no-fail-fast
+   → 2 973 passed · 0 failed · 11 ignored · 81 test binaries
+✓ cargo build --release
+   → target/release/ai-memory · 24 546 672 bytes · inode 22291476</code></pre>
+
+    <h3>Round-3 evidence memories</h3>
+    <ul>
+      <li><strong>F6 evidence:</strong> <code>78ce3651-4c16-4d5f-81dd-28a05a981990</code> (<code>ai-memory/v0.7.0-nhi-round-3</code>)</li>
+      <li><strong>Agent X (HTTP + MCP surface):</strong> summary <code>e8619c9e-6a52-43f4-8ca5-02a203208b5b</code> (note: tested against stale daemon — F7/F9/F10 fresh-binary results in the orchestrator's direct probes superseded these)</li>
+      <li><strong>Agent Y (governance / CLI / identity):</strong> summary <code>b4258981-e5f0-4c32-a1c0-a3aec2261366</code></li>
+      <li><strong>Agent Z (KG + dedup):</strong> summary <code>7de9e663-6ff1-45fa-ae1b-96a78ef3adfc</code></li>
+      <li><strong>Round-3 verdict (priority 10):</strong> <code>67ae88f9-ea2b-4df9-872e-46db9c6ba3ce</code></li>
+    </ul>
+
+    <h3>Operator action — restart the live HTTP daemon</h3>
+    <p>Round 3 could verify all fixes via an ephemeral fresh-binary daemon on port 19078, but the live HTTP daemon at port 19077 (PID 70896, parent <code>launchd</code>) is still mapped to the pre-rebuild inode. Sandbox policy blocks the orchestrator from killing shared services; the operator runs:</p>
+    <pre><code># 1. graceful stop (triggers WAL checkpoint via the SIGINT handler in serve())
+kill -INT 70896
+
+# 2. wait for exit, then relaunch with the same args
+until ! kill -0 70896 2>/dev/null; do sleep 1; done
+nohup /opt/homebrew/bin/ai-memory serve \
+  --host 127.0.0.1 --port 19077 \
+  --db /Users/fate/.claude/ai-memory.db \
+  &gt;/tmp/ai-memory-serve.log 2&gt;&amp;1 &amp;
+
+# 3. verify the new PID maps to the post-Round-3 inode
+NEWPID=$(pgrep -f 'ai-memory serve --host 127.0.0.1 --port 19077')
+lsof -p $NEWPID | awk '/ai-memory$/ {print $9, "inode="$7}'
+# expect inode 22291476 (the f02d092 build) instead of 21858535 (stale)
+
+# 4. confirm the F8 + F12 fixes are live on the new daemon
+curl -s http://127.0.0.1:19077/api/v1/capabilities | jq '.permissions.mode'
+# expect "enforce"</code></pre>
+
+    <h3>Hard-rule compliance (Round 3)</h3>
+    <ul>
+      <li>No PRs merged. PR #643, #636, #626 all open.</li>
+      <li>No tags cut. No publishing.</li>
+      <li>One commit pushed (<code>f02d092</code>) on top of <code>round-2-fixes</code> (PR #643's branch). Three files changed: <code>src/config.rs</code> (effective_permissions_mode), <code>src/daemon_runtime.rs</code> (ensure_and_load_daemon_keypair + ServeBootstrap field), <code>src/mcp.rs</code> (find_paths description).</li>
+      <li>Live daemon NOT restarted by the orchestrator (sandbox policy + operator-gated shared service).</li>
+      <li>Ephemeral fresh-binary daemon spawned on port 19078 for verification only; killed cleanly afterwards.</li>
+      <li>All Round-3 artifacts persisted under <code>ai-memory/v0.7.0-nhi-round-3/&lt;slug&gt;</code> sub-namespaces; pre-existing namespaces unmodified.</li>
+      <li>Test scratch memories cleaned up scope-bounded (<code>forget --namespace …/r3-validator/&lt;sub&gt;</code>).</li>
+    </ul>
+
+    <h3>Recall the Round-3 verdict</h3>
+    <pre><code>memory_recall context="v0.7.0 Round-3 verdict" namespace="ai-memory/v0.7.0-nhi-round-3"</code></pre>
+
+    <div class="links-row">
+      <a class="primary" href="https://github.com/alphaonedev/ai-memory-mcp/pull/643">PR #643 — Round-2 fix campaign + Round-3 follow-up</a>
+      <a href="https://github.com/alphaonedev/ai-memory-mcp/commit/f02d092">commit f02d092 — Round-3 fixes</a>
+      <a href="https://github.com/alphaonedev/ai-memory-mcp/pull/626">PR #626 — release/v0.7.0 (human-gated)</a>
+      <a href="#fix-campaign">↑ Round-2 fix campaign</a>
+      <a href="#round2">↑ Round 2 sweep</a>
     </div>
   </div>
 </section>
