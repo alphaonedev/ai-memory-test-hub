@@ -1,15 +1,15 @@
 <!--
   Copyright 2026 AlphaOne LLC
   SPDX-License-Identifier: Apache-2.0
-  v0.7.0 release — full-spectrum NHI test verdict + post-NHI fixes.
+  v0.7.0 release — full-spectrum NHI test verdict (Round 1: SHIP-WITH-NOTES) + post-NHI fixes + Round 2 multi-agent regression sweep (HOLD-TAG: F6/F7/F8).
 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ai-memory · Test Hub · v0.7.0 NHI evidence</title>
-<meta name="description" content="v0.7.0 attested-cortex release — full-spectrum NHI (Non-Human Identity) test results, verdict (SHIP-WITH-NOTES), per-phase evidence, and the post-NHI fixes PR #636.">
+<title>ai-memory · Test Hub · v0.7.0 NHI evidence (Round 1 + Round 2)</title>
+<meta name="description" content="v0.7.0 attested-cortex — Round-1 NHI verdict (SHIP-WITH-NOTES, 114/132 pass) + post-NHI fixes (PR #636) + Round-2 multi-agent regression sweep against the post-fix binary, which surfaced 3 new release-blockers (F6 LLM-dispatch deadlock, F7 HTTP quota bypass, F8 advisory-default permissions): HOLD TAG until F6/F7/F8 resolved.">
 <style>
 :root{--bg:#000;--bg-card:#111;--bg-elev:#161616;--bg-code:#1a1a1a;--border:#262626;--border-hl:#3d3d3d;--text:#fff;--text-muted:#999;--text-dim:#666;--p1:#6ee7ff;--p2:#ffb86b;--p3:#c8a2ff;--good:#6ee7ff;--bad:#ff6b9d;--gold:#ffd700;--font-mono:'SF Mono','Cascadia Code','Fira Code',Consolas,monospace;--font-sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;--max-w:1200px}
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -33,6 +33,11 @@ pre code{background:transparent;padding:0;color:var(--text)}
 .hero .subtitle{font-family:var(--font-mono);color:var(--text-muted);font-size:.95rem;margin-bottom:1.25rem}
 .hero .verdict{display:inline-block;font-family:var(--font-mono);font-size:.95rem;letter-spacing:.08em;text-transform:uppercase;padding:.5em 1.1em;border-radius:6px;margin-bottom:1rem;font-weight:700}
 .hero .verdict.ship{color:var(--good);background:rgba(110,231,255,0.12);border:1px solid rgba(110,231,255,0.4)}
+.hero .verdict.hold{color:var(--p2);background:rgba(255,184,107,0.15);border:1px solid rgba(255,184,107,0.5)}
+.hero .verdict.block{color:var(--bad);background:rgba(255,107,157,0.12);border:1px solid rgba(255,107,157,0.45)}
+.hero .verdict-row{display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap;margin-bottom:1rem}
+.hero .verdict-row .verdict{margin-bottom:0}
+.hero .verdict .label{font-size:.65rem;display:block;letter-spacing:.12em;color:var(--text-dim);margin-bottom:.15rem;font-weight:500}
 .hero p.lede{color:var(--text-muted);max-width:780px;margin:1rem auto 0;font-size:1rem}
 
 .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-top:2rem}
@@ -103,6 +108,21 @@ footer a{color:var(--text-muted)}
 
 .note{background:var(--bg-elev);border-left:3px solid var(--p2);padding:.85rem 1.1rem;border-radius:0 6px 6px 0;font-size:.88rem;color:var(--text-muted);margin:1rem 0}
 .note strong{color:var(--text)}
+.note.block{border-left-color:var(--bad)}
+.note.good{border-left-color:var(--good)}
+
+.agents{display:grid;gap:.85rem;margin-top:1rem}
+.agent-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:1.15rem 1.25rem}
+.agent-card .head{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;flex-wrap:wrap;margin-bottom:.55rem}
+.agent-card .head .id{font-family:var(--font-mono);font-weight:700;color:var(--p1);font-size:.95rem}
+.agent-card h3{margin:0 0 .55rem;font-family:var(--font-sans);font-size:1.05rem;font-weight:600}
+.agent-card p{color:var(--text-muted);font-size:.9rem;margin-bottom:.4rem}
+.agent-card .stats{font-family:var(--font-mono);font-size:.78rem;color:var(--text-muted);display:flex;gap:.85rem;flex-wrap:wrap;margin-top:.4rem}
+.agent-card .stats .pass{color:var(--good)}
+.agent-card .stats .partial{color:var(--p2)}
+.agent-card .stats .fail{color:var(--bad)}
+.agent-card .stats .gap{color:var(--p3)}
+.agent-card .memid{font-family:var(--font-mono);font-size:.72rem;color:var(--text-dim);margin-top:.3rem;word-break:break-all}
 </style>
 </head>
 <body>
@@ -111,7 +131,8 @@ footer a{color:var(--text-muted)}
   <div class="inner">
     <a class="home-link" href="../../">ai-memory · Test Hub</a>
     <div class="right">
-      <a href="#verdict">Verdict</a>
+      <a href="#round2" style="color:var(--p2);font-weight:600">Round 2</a>
+      <a href="#verdict">Round 1</a>
       <a href="#phases">Phases</a>
       <a href="#findings">Findings</a>
       <a href="#strengths">Strengths</a>
@@ -122,51 +143,152 @@ footer a{color:var(--text-muted)}
 </nav>
 
 <section class="hero">
-  <span class="eyebrow">v0.7.0 attested-cortex · Full-Spectrum NHI Test</span>
-  <h1>v0.7.0 NHI Test — SHIP-WITH-NOTES</h1>
-  <p class="subtitle">12 phases · 51 MCP tools · 175 live memories · 0 outright failures</p>
-  <div class="verdict ship">SHIP-WITH-NOTES</div>
-  <p class="lede">A fresh Claude Code CLI session executed the full Non-Human Identity test playbook end-to-end against the v0.7.0 binary on a live MCP database. 114 PASS, 6 partials, 12 config-gated gaps — zero P0/P1 blockers. The actionable P2 findings landed on PR #636; the surface itself is production-ready.</p>
+  <span class="eyebrow">v0.7.0 attested-cortex · NHI Test (Round 1 + Round 2 multi-agent regression)</span>
+  <h1>v0.7.0 NHI Test — Round 2 found regressions</h1>
+  <p class="subtitle">Round 1: 12 phases · Round 2: 5 parallel sub-agents against the post-fix binary</p>
+  <div class="verdict-row">
+    <div class="verdict ship"><span class="label">Round 1</span>SHIP-WITH-NOTES</div>
+    <div class="verdict hold"><span class="label">Round 2 (current)</span>HOLD-TAG · F6/F7/F8</div>
+  </div>
+  <p class="lede"><strong>Round 1</strong> ran the 12-phase NHI playbook; result was 114 PASS / 6 partial / 12 config-gap / 0 outright fail with three P2 fixes shipped on PR #636. <strong>Round 2</strong> dispatched 5 parallel sub-agents against the post-fix binary to verify the fixes held and to attack the surface from new angles. Round-1 fixes (F2, F3, F4-helper) all verified clean — but Round 2 surfaced three new release-blocking issues: F6 (LLM-dispatch deadlock + silent recall degradation + daemon crash), F7 (HTTP store path bypasses quota counters), and F8 (<code>permissions.mode=advisory</code> default disables write enforcement). Tag v0.7.0 only after these are resolved or explicitly downgraded with documentation.</p>
   <div class="metrics container">
     <div class="metric">
-      <div class="label">Tests passed</div>
+      <div class="label">Round 1 — tests passed</div>
       <div class="value good">114 / 132</div>
-      <div class="sub">+ 12 config-gated gaps (defaults-OFF posture)</div>
+      <div class="sub">+ 12 config-gated gaps · 0 outright fail</div>
     </div>
     <div class="metric">
-      <div class="label">Cargo test suite</div>
-      <div class="value good">2 883 / 2 883</div>
-      <div class="sub">67 suites · post-fix branch</div>
+      <div class="label">Round 2 — agent aggregate</div>
+      <div class="value warn">26 PASS / 4 FAIL</div>
+      <div class="sub">3 partial · 4 schema-gap · 4 fails all gated by F6</div>
     </div>
     <div class="metric">
-      <div class="label">Trimmed token budget (C5)</div>
-      <div class="value good">2 316</div>
-      <div class="sub">≤ 3 500 ceiling · 1 184 headroom</div>
+      <div class="label">Round 1 fixes verified</div>
+      <div class="value good">3 / 3</div>
+      <div class="sub">F2, F3, F4-helper · PASS in Round 2</div>
     </div>
     <div class="metric">
-      <div class="label">Top per-tool tokens</div>
-      <div class="value good">522</div>
-      <div class="sub"><code>memory_recall</code> · 35% of 1 500 ceiling</div>
+      <div class="label">New Round-2 blockers</div>
+      <div class="value warn">3</div>
+      <div class="sub">F6 · F7 · F8 (security-default callout)</div>
     </div>
     <div class="metric">
-      <div class="label">P0 / P1 blockers</div>
-      <div class="value good">0</div>
-      <div class="sub">F1, F5 closed as test-bugs</div>
+      <div class="label">Round 2 — release-notes items</div>
+      <div class="value">10</div>
+      <div class="sub">F9–F18 · doc / surface / UX</div>
     </div>
     <div class="metric">
-      <div class="label">P2 fixes shipped</div>
-      <div class="value good">3 + helper</div>
-      <div class="sub">F2, F3, F4 helper · PR #636</div>
+      <div class="label">Round 2 — perf baseline</div>
+      <div class="value good">33.9 / s</div>
+      <div class="sub">1000 sequential MCP stores · p99 27 ms</div>
+    </div>
+  </div>
+</section>
+
+<section id="round2">
+  <div class="container">
+    <span class="eyebrow">Round 2 · multi-agent regression sweep</span>
+    <h2>HOLD TAG. Three new release-blockers found in Round 2.</h2>
+    <p class="lede">After Round 1 shipped post-NHI fixes on PR #636, Round 2 re-ran a verification sweep against the patched binary using <strong>5 parallel sub-agents</strong>, each writing to its own sub-namespace under <code>ai-memory/v0.7.0-nhi-round-2</code>. Round-1 fixes hold (F2, F3, F4 helper all PASS). But Round 2 surfaced regressions and security-default issues that did not appear in Round 1 because that round did not stress the LLM dispatch path, the HTTP quota path, or default permission enforcement.</p>
+
+    <div class="note block"><strong>Recommendation:</strong> Do not cut the v0.7.0 tag until F6, F7, and F8 are either fixed in a follow-up PR or explicitly downgraded with documented release-notes guidance. F6 reproduced live by the orchestrator: <code>memory_expand_query</code> returns <em>"Failed to send chat request"</em> while ollama <code>/api/chat</code> responds in 5.6 s when called directly, and <code>memory_recall</code> silently returns <code>mode:keyword</code> while <code>memory_capabilities</code> still advertises <code>recall_mode_active=hybrid</code>.</div>
+
+    <h3>Sub-agent results</h3>
+    <div class="agents">
+      <div class="agent-card">
+        <div class="head"><span class="id">Agent A</span><span class="sev closed">Round-1 fixes verified</span></div>
+        <h3>F2/F3/F4 fix verification + KG deep dive</h3>
+        <p>Verified the three Round-1 fixes against the patched binary: <code>entity_register</code> persists <code>canonical_name</code> as alias (F2); <code>kg_query</code> and <code>find_paths</code> default to current view with <code>include_invalidated=true</code> opt-in (F3); <code>GovernancePolicy::default_for_managed_namespace</code> helper round-trips correctly via explicit <code>set_standard</code>/<code>get_standard</code> (F4). KG stress: 50 entities, 4 relation types, directed cycle, depths 1..5, <code>find_paths</code> max_depth=7 max_results=50, edge invalidation matrix — all clean.</p>
+        <div class="stats"><span class="pass">PASS · 4</span><span class="gap">schema-gap · 3 (tool-surface docs)</span></div>
+        <div class="memid">summary memory · ad88cf88-18a0-4757-9f10-bca1b69792a5</div>
+      </div>
+
+      <div class="agent-card">
+        <div class="head"><span class="id">Agent B</span><span class="sev p1" style="color:var(--bad);background:rgba(255,107,157,0.12)">F6 surfaced · BLOCKER</span></div>
+        <h3>Power tools + autonomous-tier exhaustive</h3>
+        <p>All four LLM-backed power tools (<code>memory_consolidate</code>, <code>memory_expand_query</code>, <code>memory_auto_tag</code>, <code>memory_detect_contradiction</code>) returned <em>"Failed to send chat request"</em> immediately. <code>sample</code> on the MCP daemon (PID 69382) shows the main thread pegged at 99.3% CPU spinning in <code>clock_gettime</code> / <code>mach_absolute_time</code> (621/746 samples ≈ 83% — busy-loop in an async-runtime poll path). Ollama itself is healthy (gemma4:e4b loaded, <code>/api/chat</code> responds in 5.6s when called directly). <code>memory_recall</code> silently degraded from <code>hybrid</code> to <code>keyword</code> mode while capabilities still advertised <code>hybrid</code>. <code>memory_inbox</code> delivered 100/100 messages but with a 30-second cadence on the first 20, dropping to ~1.5s/msg after backpressure cleared. <code>memory_check_duplicate</code> threshold curve healthy (PASS, 1 of 6 task sections).</p>
+        <div class="stats"><span class="pass">PASS · 1</span><span class="partial">partial · 1</span><span class="fail">FAIL · 4</span></div>
+        <div class="memid">summary memory · 01ddbac5-4105-41f5-83b3-3d19632d28b5</div>
+      </div>
+
+      <div class="agent-card">
+        <div class="head"><span class="id">Agent C</span><span class="sev closed">PASS · X-Agent-Id confirmed</span></div>
+        <h3>Cross-interface + chaos</h3>
+        <p>Re-ran the cross-interface phase using the correct <code>X-Agent-Id</code> header (Round 1's <code>X-AI-Memory-Agent-Id</code> was the test-side bug captured in the erratum). Header valid → 201 stamped, malformed → 400 with sanitized regex error, body wins precedence over header, no header + no body → <code>anonymous:req-&lt;uuid&gt;</code> fallback. Chaos: malformed JSON-RPC, missing required fields, invalid <code>tier</code>, content-cap edges (65535 / 65536 / 65537 bytes), 10-way concurrent racing stores → 1×201 + 9×409 CONFLICT clean, doctor INFO post-chaos. 1000 sequential stores: 33.9/s, p95 25 ms, p99 27 ms, 0 errors. Lifecycle stress (200 short + 50 mid + 20 long) → gc + archive_stats + forget by namespace/pattern/tier all behaved.</p>
+        <div class="stats"><span class="pass">PASS · 14</span></div>
+        <div class="memid">summary memory · f157a805-…</div>
+      </div>
+
+      <div class="agent-card">
+        <div class="head"><span class="id">Agent D</span><span class="sev p1" style="color:var(--bad);background:rgba(255,107,157,0.12)">F7 + F8 surfaced</span></div>
+        <h3>Governance / security / observability</h3>
+        <p>SSRF guards: all 5 reject vectors blocked with sanitized errors (loopback, link-local 169.254, RFC1918 10.0.0.0, <code>file://</code>, plaintext non-loopback). Subscription full lifecycle: 50 events fired → DLQ ladder → <code>memory_subscription_replay since=24h-ago</code> returned 107 events. Agent registry: 8 distinct agent_types registered + listed cleanly. <strong>Permission probe (PARTIAL):</strong> <code>permissions.mode=advisory</code> is the v0.7.0 default — non-owner writes ACCEPTED even with <code>metadata.governance.write=owner</code> set. <strong>Quota isolation (GAP):</strong> 500 stores via <code>POST /api/v1/memories</code> succeeded but <code>memory_quota_status</code> shows zero new rows — the HTTP path bypasses quota counters; MCP path increments correctly. Doctor INFO post-run. Daemon crashed once mid-test and was restarted with the same args.</p>
+        <div class="stats"><span class="pass">PASS · 4</span><span class="partial">partial · 1</span><span class="gap">gap · 1</span></div>
+        <div class="memid">summary memory · c81afbb3-b1e8-499a-b1cc-ebd94c2a1300</div>
+      </div>
+
+      <div class="agent-card">
+        <div class="head"><span class="id">Agent E</span><span class="sev closed">budget green · 8/10 routing</span></div>
+        <h3>Capabilities / token budget / smart_load / load_family</h3>
+        <p>Capabilities matrix: 14 shapes (default / accept=v1 / accept=v2 / family=&lt;each-of-8&gt; / verbose / include_schema / combinations) — all returned data; per-family drill-in works. <strong>Token budget gate PASS</strong>: trimmed full = 2316 tokens (≤ 3500 ceiling, 34% headroom); max single tool = 522 (≤ 1500). <strong>Smart-load: 8 / 10 PASS</strong> — "send a notification" routed to <code>meta</code> (expected <code>other</code>/<code>power</code>); "expand a query and find related memories" routed to <code>graph</code> (expected <code>power</code>). <code>memory_load_family</code> idempotent for each of 8 families. Findings: <code>memory_capabilities</code> MCP <code>inputSchema</code> declares zero properties yet server accepts 4; <code>include_schema=true</code> is inert despite the <code>v0.6.4-family-schemas-1</code> label; <code>verbose=true</code> is a no-op; <code>doctor --tokens --json</code> reports its own DB-handle profile, not the running MCP server's <code>full</code> profile.</p>
+        <div class="stats"><span class="pass">PASS · 3</span><span class="partial">partial · 1 (smart-load 8/10)</span></div>
+        <div class="memid">summary memory · ed99f774-9d1d-4908-b9cb-cbbee84d3a21</div>
+      </div>
+    </div>
+
+    <h3>New Round-2 findings</h3>
+    <div class="note"><strong>Numbering note:</strong> Round-2 findings reuse the <code>F</code> prefix in their own sequence (F6–F18) for readability. The Round-1 historical <code>F6</code> ("verbose=true docstring already correct — closed as not-a-bug", listed in the Round-1 findings section further down) is a separate item and does not conflict in scope.</div>
+    <div class="findings">
+      <div class="finding">
+        <div class="head"><span class="id">F6</span><span class="sev p1" style="color:var(--bad);background:rgba(255,107,157,0.12)">BLOCKER</span></div>
+        <h3>LLM-dispatch deadlock + silent <code>recall</code> degradation + daemon crash</h3>
+        <p>The MCP daemon's main thread pegs at 99.3% CPU in a <code>clock_gettime</code> / <code>mach_absolute_time</code> busy-loop (likely a <code>tokio</code> task that polls without yielding), and from that point all four LLM-backed tools (<code>consolidate</code>, <code>expand_query</code>, <code>auto_tag</code>, <code>detect_contradiction</code>) return <em>"Failed to send chat request"</em> while ollama is independently healthy. <code>memory_recall</code> falls back to <code>keyword</code> mode silently while <code>memory_capabilities</code> still advertises <code>hybrid</code>. The daemon eventually crashed in this run and required a restart.</p>
+        <p class="resolution deferred"><strong>Status:</strong> reproduced live by the Round-2 orchestrator. Investigate the busy-loop on the main thread (sample evidence at <code>src</code> async-poll path), surface embed/chat status to clients, and never silently downgrade <code>recall_mode_active</code>.</p>
+      </div>
+      <div class="finding">
+        <div class="head"><span class="id">F7</span><span class="sev p1" style="color:var(--bad);background:rgba(255,107,157,0.12)">BLOCKER</span></div>
+        <h3>HTTP <code>POST /api/v1/memories</code> bypasses quota counters</h3>
+        <p>500 stores from <code>agent-d-quota:alpha-01</code> + 5 from <code>:beta-01</code> via the HTTP API succeeded but <code>memory_quota_status</code> shows zero new rows. The same agent_id stamping a memory through the MCP path increments quota counters correctly. Quota enforcement is bypassable from any HTTP client. Regression candidate vs. v0.6.x.</p>
+        <p class="resolution deferred"><strong>Status:</strong> Wire the HTTP store handler through the same quota-increment path as MCP; verify with a regression test that pumps N stores via HTTP and asserts <code>memory_quota_status</code> matches.</p>
+      </div>
+      <div class="finding">
+        <div class="head"><span class="id">F8</span><span class="sev p1" style="color:var(--p2);background:rgba(255,184,107,0.15)">SECURITY · DECISION</span></div>
+        <h3><code>permissions.mode</code> defaults to <code>advisory</code> in v0.7.0</h3>
+        <p>Fresh deployments have NO write enforcement until an operator opts in. A namespace with <code>metadata.governance.write=owner</code> still accepted writes from an unrelated <code>agent_id</code> because advisory mode is non-blocking. If "default-secure" is the v0.7.0 promise, this is a blocker. If "advisory by default, opt-in to enforce" is documented release behavior, this is a release-notes item with a prominent README + <code>--help</code> + first-run-banner callout.</p>
+        <p class="resolution deferred"><strong>Status:</strong> Decide policy. Either flip default to <code>enforce</code> with migration notes for existing deployments, or document the advisory default explicitly in release notes, README, and the daemon's first-run UX banner.</p>
+      </div>
+      <div class="finding">
+        <div class="head"><span class="id">F9–F18</span><span class="sev p3">P3 · release-notes / v0.7.1</span></div>
+        <h3>Ten release-notes items (non-blocking)</h3>
+        <p><strong>F9</strong> HTTP missing-required returns 422 (axum body-extractor) not 400 — spec/doc drift. <strong>F10</strong> Embedder timeout on &gt;64 KB content silently produces an un-indexed row committed at HTTP 201; embed status not surfaced to clients. <strong>F11</strong> <code>forget --pattern X</code> and <code>forget --tier T</code> without <code>--namespace</code> are GLOBAL deletes — no safety rail (since v0.6.x). <strong>F12</strong> Ed25519 keypair not auto-generated on <code>serve</code> startup — link signing disabled by default. <strong>F13</strong> <code>memory_capabilities</code> MCP <code>inputSchema</code> declares zero properties yet the server accepts <code>accept</code> / <code>family</code> / <code>include_schema</code> / <code>verbose</code>; <code>verbose=true</code> is a no-op; <code>include_schema=true</code> is inert despite the <code>v0.6.4-family-schemas-1</code> label; <code>accept=v1</code> strips <code>schema_version</code> (breaks v1 wire-version detection); <code>doctor --tokens --json</code> reports its own DB-handle profile, not the running MCP server's <code>full</code> profile (operator-confusion risk). <strong>F14</strong> Smart-load router under-weights underscore tokens — "send a notification" → <code>meta</code> (expected <code>other</code>/<code>power</code>); "expand a query and find related memories" → <code>graph</code> (expected <code>power</code>). <strong>F15</strong> MCP <code>memory_store</code> / <code>memory_update</code> <code>inputSchema</code> lacks a <code>metadata</code> field; governance standards must be authored via HTTP. <strong>F16</strong> <code>agent_type</code> MCP enum is closed but the daemon accepts any open form — schema/server mismatch. <strong>F17</strong> <code>find_paths</code> <code>max_depth</code> hard-capped at 7 (<code>src/db.rs:3592</code>); <code>find_paths</code> undirected vs. <code>kg_query</code> directed — by design, surface in tool descriptions. <strong>F18</strong> <code>check_duplicate</code> similarity caps near 0.92 for byte-identical strings (embedding+normalization artifact); single-token factual mutation (date swap) at sim 0.913 — that's the contradiction tool's job.</p>
+        <p class="resolution"><strong>Documented</strong> in the Round-2 verdict memory · scoped to v0.7.0 release notes or v0.7.1 follow-up.</p>
+      </div>
+    </div>
+
+    <h3>Hard-rule compliance</h3>
+    <ul>
+      <li>No code modified. No PRs merged. PR #636 (post-NHI fixes) still open for human review. PR #626 (release/v0.7.0) still human-gated. No tags cut. No publishing.</li>
+      <li>All Round-2 artifacts persisted under <code>ai-memory/v0.7.0-nhi-round-2/&lt;agent-slug&gt;</code> sub-namespaces; pre-existing namespaces (<code>ai-memory/v0.7.0-nhi-testing</code>, etc.) unmodified.</li>
+      <li>Live ai-memory daemon was NOT restarted by the orchestrator. Agent D restarted it once mid-test after a crash, using the same args — non-destructive.</li>
+    </ul>
+
+    <h3>Recall the Round-2 verdict</h3>
+    <pre><code>memory_recall context="v0.7.0 Round-2 verdict" namespace="ai-memory/v0.7.0-nhi-round-2"</code></pre>
+    <div class="links-row">
+      <a class="primary" href="https://github.com/alphaonedev/ai-memory-mcp/pull/636">PR #636 — post-NHI fixes (open)</a>
+      <a href="https://github.com/alphaonedev/ai-memory-mcp/pull/626">PR #626 — release/v0.7.0 (human-gated)</a>
+      <a href="#verdict">↓ Round 1 evidence</a>
     </div>
   </div>
 </section>
 
 <section id="verdict">
   <div class="container">
-    <span class="eyebrow">Recommendation</span>
-    <h2>Ship v0.7.0 with release-notes additions.</h2>
+    <span class="eyebrow">Round 1 · recommendation (superseded by Round 2 · HOLD-TAG)</span>
+    <h2>Round 1: Ship v0.7.0 with release-notes additions.</h2>
     <p class="lede">The v0.7.0 surface is correct, well-bounded, sanitized, and observable across all 12 NHI test phases. Three P2 fixes plus the F4 opt-in helper landed on PR #636 against <code>release/v0.7.0</code>. Six P3 polish items are appropriate for v0.7.1.</p>
     <p class="lede">Default-OFF posture for HMAC, audit, signing keys, and <code>[[hooks]]</code> means several #628 audit-blocker probes are untestable until operators opt in. The daemon's first-run UX tells operators exactly how to enable each feature; document this in release notes.</p>
+    <div class="note"><strong>Round-2 update:</strong> the Round-1 recommendation above is the conclusion from the original 12-phase NHI playbook. The Round-2 multi-agent regression sweep (above) supersedes this with HOLD-TAG pending F6 / F7 / F8.</div>
     <div class="links-row">
       <a class="primary" href="https://github.com/alphaonedev/ai-memory-mcp/pull/636">PR #636 — post-NHI fixes</a>
       <a href="https://github.com/alphaonedev/ai-memory-mcp/pull/626">PR #626 — release/v0.7.0 (human-gated)</a>
@@ -177,8 +299,8 @@ footer a{color:var(--text-muted)}
 
 <section id="phases">
   <div class="container">
-    <span class="eyebrow">12-phase summary</span>
-    <h2>Per-phase verdicts.</h2>
+    <span class="eyebrow">Round 1 · 12-phase summary</span>
+    <h2>Round 1 — per-phase verdicts.</h2>
     <p class="lede">Each phase produced a single result memory in namespace <code>ai-memory/v0.7.0-nhi-testing</code>; counts below are PASS / partial / config-gap.</p>
     <div class="phases">
       <div class="phase"><span class="id">P0</span><span class="name">Environment &amp; version handshake</span><span class="stats">10 / 0 / 0</span><span class="v pass">PASS</span></div>
@@ -200,9 +322,9 @@ footer a{color:var(--text-muted)}
 
 <section id="findings">
   <div class="container">
-    <span class="eyebrow">Findings &amp; resolutions</span>
-    <h2>Six findings, four code paths touched, two test-bugs.</h2>
-    <p class="lede">Each finding's resolution is linked to commits or memory-namespace entries. Findings F1 and F5 closed as test-bugs (the NHI test used the wrong header name). F2, F3, F4 helper landed on PR #636. F6 closed as already-documented.</p>
+    <span class="eyebrow">Round 1 · findings &amp; resolutions</span>
+    <h2>Round 1 — six findings, four code paths touched, two test-bugs.</h2>
+    <p class="lede">Each finding's resolution is linked to commits or memory-namespace entries. Findings F1 and F5 closed as test-bugs (the NHI test used the wrong header name). F2, F3, F4 helper landed on PR #636. F6-Round1 closed as already-documented. (Round-2 findings F6–F18 are listed in the Round-2 section above.)</p>
 
     <div class="findings">
       <div class="finding">
@@ -382,8 +504,12 @@ footer a{color:var(--text-muted)}
     <h3>Result conventions</h3>
     <p>Each phase result memory carries: title <code>NHI-P&lt;N&gt;-&lt;short-name&gt;</code>, namespace <code>ai-memory/v0.7.0-nhi-testing</code>, tier <code>long</code>, priority 8 (9 if blocker found), tags <code>["v0.7.0", "nhi-testing", "phase-N", "&lt;area&gt;"]</code>. The final verdict carries priority 10 and tags <code>["verdict", "ship-readiness", "summary"]</code>.</p>
 
-    <h3>Recall the verdict</h3>
+    <h3>Recall the Round-1 verdict</h3>
     <pre><code>memory_recall context="v0.7.0 verdict" namespace="ai-memory/v0.7.0-nhi-testing"</code></pre>
+
+    <h3>Round 2 · multi-agent regression sweep</h3>
+    <p class="lede">Round 2 ran in a fresh CLI session against the post-NHI-fix binary (<code>/Users/fate/v07/v07-fixes/target/release/ai-memory</code>, post-fix branch HEAD <code>72a021f</code>, contains F2 + F3 + F4-helper). The orchestrator dispatched <strong>5 sub-agents in a single tool-call batch</strong> (Agent A — F2/F3/F4 verification + KG deep dive, B — power tools exhaustive, C — cross-interface + chaos, D — governance / security / observability, E — capabilities / token budget / smart_load), each writing into its own sub-namespace under <code>ai-memory/v0.7.0-nhi-round-2/&lt;agent-slug&gt;</code>. After all agents returned, the orchestrator recalled the 5 summary memories and composed the Round-2 verdict at priority 10 in <code>ai-memory/v0.7.0-nhi-round-2</code>. No code was modified, no PR was merged, no tag was cut.</p>
+    <pre><code>memory_recall context="v0.7.0 Round-2 verdict" namespace="ai-memory/v0.7.0-nhi-round-2"</code></pre>
   </div>
 </section>
 
@@ -407,7 +533,7 @@ footer a{color:var(--text-muted)}
 </section>
 
 <footer>
-  <p>v0.7.0 NHI test artifacts are persisted in the <code>ai-memory/v0.7.0-nhi-testing</code> memory namespace.</p>
+  <p>v0.7.0 NHI test artifacts are persisted in <code>ai-memory/v0.7.0-nhi-testing</code> (Round 1) and <code>ai-memory/v0.7.0-nhi-round-2</code> (Round 2 multi-agent regression sweep).</p>
   <p style="margin-top:.5rem"><a href="../../">← Test Hub</a> &nbsp;·&nbsp; <a href="https://github.com/alphaonedev/ai-memory-mcp">ai-memory-mcp</a> &nbsp;·&nbsp; <a href="https://github.com/alphaonedev/ai-memory-test-hub">test-hub</a></p>
   <p style="margin-top:.85rem;font-size:.78rem">© 2026 AlphaOne LLC · Apache-2.0</p>
 </footer>
